@@ -1,0 +1,3 @@
+- [ ] Add dark mode toggle button to header in index.html
+- [ ] Add dark mode CSS styles in styles.css
+- [ ] Add JavaScript functionality to toggle dark mode and persist preference in script.js
