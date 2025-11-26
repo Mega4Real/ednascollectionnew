@@ -17,7 +17,8 @@ const AdminDashboard = () => {
 
     const fetchProducts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/products');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${apiUrl}/api/products`);
             setProducts(res.data);
         } catch (error) {
             console.error('Error fetching products', error);
@@ -51,7 +52,8 @@ const AdminDashboard = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            await axios.post('http://localhost:5000/api/products', {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${apiUrl}/api/products`, {
                 ...formData,
                 price: parseFloat(formData.price)
             }, {
@@ -73,7 +75,8 @@ const AdminDashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/products/${id}`, {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.delete(`${apiUrl}/api/products/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchProducts();
