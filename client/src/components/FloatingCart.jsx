@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 const FloatingCart = ({ selectedItems, onRemoveItem }) => {
     const [isVisible, setIsVisible] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const cartRef = useRef(null);
 
     const total = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -47,40 +48,54 @@ const FloatingCart = ({ selectedItems, onRemoveItem }) => {
         };
     }, []);
 
+    if (selectedItems.length === 0) return null;
+
     return (
         <div className={`floating-cart ${!isVisible ? 'hide-cart' : ''}`} ref={cartRef}>
-            <div className="cart-header">
+            <div
+                className="cart-header"
+                onClick={() => setIsOpen(!isOpen)}
+                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+            >
                 <div className="cart-count">
                     <span id="selected-count">{selectedItems.length}</span>
-                    <span className="cart-label">Selected Items</span>
+                    <span className="cart-label">Selected Items {isOpen ? '▼' : '▲'}</span>
                 </div>
                 <div className="total-price" id="total-price">₵{total.toFixed(2)}</div>
             </div>
-            <div className="selected-items" id="selected-items">
-                {selectedItems.map(item => (
-                    <div key={`${item.id}-${item.selectedSize}`} className="selected-item">
-                        <img src={item.imageUrl || item.image} alt={`Dress ${item.id}`} />
-                        <div className="item-details">
-                            <div className="item-size">Size: {item.selectedSize}</div>
-                            <div className="item-price">₵{item.price.toFixed(2)}</div>
-                        </div>
-                        <button
-                            className="delete-item"
-                            onClick={() => onRemoveItem(item.id)}
-                        >
-                            ×
-                        </button>
+
+            {isOpen && (
+                <>
+                    <div className="selected-items" id="selected-items">
+                        {selectedItems.map(item => (
+                            <div key={`${item.id}-${item.selectedSize}`} className="selected-item">
+                                <img src={item.imageUrl || item.image} alt={`Dress ${item.id}`} />
+                                <div className="item-details">
+                                    <div className="item-size">Size: {item.selectedSize}</div>
+                                    <div className="item-price">₵{item.price.toFixed(2)}</div>
+                                </div>
+                                <button
+                                    className="delete-item"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onRemoveItem(item.id);
+                                    }}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-            <button
-                id="send-to-whatsapp"
-                disabled={selectedItems.length === 0}
-                onClick={handleSendToWhatsApp}
-            >
-                <span className="whatsapp-icon">📱</span>
-                Send to WhatsApp
-            </button>
+                    <button
+                        id="send-to-whatsapp"
+                        disabled={selectedItems.length === 0}
+                        onClick={handleSendToWhatsApp}
+                    >
+                        <span className="whatsapp-icon">📱</span>
+                        Send to WhatsApp
+                    </button>
+                </>
+            )}
         </div>
     );
 };
