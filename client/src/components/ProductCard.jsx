@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 
-const ProductCard = ({ product, isSelected, onToggleSelect, onPreview }) => {
-    const [selectedSize, setSelectedSize] = useState(null);
+const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onToggleSelect, onPreview }) => {
+    const [selectedSize, setSelectedSize] = useState(propSelectedSize || null);
+
+    // Sync local state with prop when it changes (e.g. loaded from storage or removed from cart)
+    React.useEffect(() => {
+        if (isSelected && propSelectedSize) {
+            setSelectedSize(propSelectedSize);
+        } else if (!isSelected) {
+            setSelectedSize(null);
+        }
+    }, [isSelected, propSelectedSize]);
 
     const handleSizeClick = (e, size) => {
         e.stopPropagation();

@@ -155,15 +155,19 @@ const Home = () => {
                             Loading products...
                         </div>
                     ) : (
-                        currentProducts.map(product => (
-                            <ProductCard
-                                key={product.id}
-                                product={product}
-                                isSelected={selectedItems.some(item => item.id === product.id)}
-                                onToggleSelect={handleToggleSelect}
-                                onPreview={setPreviewProduct}
-                            />
-                        ))
+                        currentProducts.map(product => {
+                            const selectedItem = selectedItems.find(item => item.id === product.id);
+                            return (
+                                <ProductCard
+                                    key={product.id}
+                                    product={product}
+                                    isSelected={!!selectedItem}
+                                    selectedSize={selectedItem?.selectedSize}
+                                    onToggleSelect={handleToggleSelect}
+                                    onPreview={setPreviewProduct}
+                                />
+                            );
+                        })
                     )}
                 </div>
 
