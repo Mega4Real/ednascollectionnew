@@ -7,7 +7,7 @@ const Footer = () => {
                 <div className="footer-section">
                     <h3>Contact Us</h3>
                     <p>📞 Phone: <a href="tel:+233540665045">+233 54 066 5045</a></p>
-                    <p>✉️ Email: info@ednascollections.com</p>
+                    <p>✉️ Email: info@erdnascollections.com</p>
                 </div>
 
                 <div className="footer-section">
@@ -24,7 +24,7 @@ const Footer = () => {
                             <a href="https://wa.me/233274883478" target="_blank" rel="noopener noreferrer" className="social-icon whatsapp">
                                 📱 WhatsApp
                             </a>
-                            <a href="https://www.tiktok.com/@ednas_collections" target="_blank" rel="noopener noreferrer" className="social-icon tiktok">
+                            <a href="https://www.tiktok.com/@erdnas_collections" target="_blank" rel="noopener noreferrer" className="social-icon tiktok">
                                 🎵 TikTok
                             </a>
                         </div>

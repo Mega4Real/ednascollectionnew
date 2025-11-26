@@ -11,7 +11,7 @@ const Header = ({ filters, setFilters, clearFilters }) => {
 
     return (
         <header>
-            <h1>Edna's Collections</h1>
+            <h1>Erdnas Collections</h1>
             <div className="filters">
                 <div className="filter-group">
                     <label htmlFor="price-filter">Price:</label>
