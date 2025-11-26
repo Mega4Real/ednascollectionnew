@@ -35,6 +35,17 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
         }
     };
 
+    const getOptimizedImageUrl = (url) => {
+        if (!url) return '';
+        // Check if it's a Cloudinary URL
+        if (url.includes('cloudinary.com')) {
+            // Insert transformation parameters: w_500 (width 500px), q_auto (auto quality), f_auto (auto format)
+            // This assumes standard Cloudinary URL structure: .../upload/v12345/...
+            return url.replace('/upload/', '/upload/w_500,q_auto,f_auto/');
+        }
+        return url;
+    };
+
     return (
         <div
             className={`dress-card ${isSelected ? 'selected' : ''}`}
@@ -42,10 +53,11 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
             data-id={product.id}
         >
             <img
-                src={product.imageUrl || product.image}
+                src={getOptimizedImageUrl(product.imageUrl || product.image)}
                 alt={`Dress ${product.id}`}
                 className="dress-image"
                 onClick={handleImageClick}
+                loading="lazy"
             />
             <div className="dress-info">
                 <div className="dress-price">₵{product.price.toFixed(2)}</div>
