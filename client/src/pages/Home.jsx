@@ -20,6 +20,8 @@ const Home = () => {
     const [previewProduct, setPreviewProduct] = useState(null);
     const itemsPerPage = 50;
 
+    const [loading, setLoading] = useState(true);
+
     // Save selectedItems to localStorage whenever it changes
     useEffect(() => {
         localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
@@ -29,13 +31,22 @@ const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                setLoading(true);
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                 const res = await axios.get(`${apiUrl}/api/products`);
-                const sortedProducts = (res.data || []).sort((a, b) => a.id - b.id);
+                // Sort by position if available, otherwise by ID
+                const sortedProducts = (res.data || []).sort((a, b) => {
+                    if (a.position !== undefined && b.position !== undefined) {
+                        return a.position - b.position;
+                    }
+                    return a.id - b.id;
+                });
                 setProducts(sortedProducts);
             } catch (error) {
                 console.error('Error fetching products:', error);
                 setProducts([]);
+            } finally {
+                setLoading(false);
             }
         };
         fetchProducts();
@@ -133,15 +144,27 @@ const Home = () => {
 
             <main>
                 <div className="dress-container">
-                    {currentProducts.map(product => (
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            isSelected={selectedItems.some(item => item.id === product.id)}
-                            onToggleSelect={handleToggleSelect}
-                            onPreview={setPreviewProduct}
-                        />
-                    ))}
+                    {loading ? (
+                        <div style={{
+                            gridColumn: '1 / -1',
+                            textAlign: 'center',
+                            padding: '4rem',
+                            fontSize: '1.2rem',
+                            color: '#666'
+                        }}>
+                            Loading products...
+                        </div>
+                    ) : (
+                        currentProducts.map(product => (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                isSelected={selectedItems.some(item => item.id === product.id)}
+                                onToggleSelect={handleToggleSelect}
+                                onPreview={setPreviewProduct}
+                            />
+                        ))
+                    )}
                 </div>
 
                 {totalPages > 1 && (
