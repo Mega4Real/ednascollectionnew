@@ -9,10 +9,21 @@ import VideoModal from '../components/VideoModal';
 const Home = () => {
     const [products, setProducts] = useState([]);
     const [filters, setFilters] = useState({ price: '', size: '' });
-    const [selectedItems, setSelectedItems] = useState([]);
+
+    // Initialize selectedItems from localStorage
+    const [selectedItems, setSelectedItems] = useState(() => {
+        const saved = localStorage.getItem('selectedItems');
+        return saved ? JSON.parse(saved) : [];
+    });
+
     const [currentPage, setCurrentPage] = useState(1);
     const [previewProduct, setPreviewProduct] = useState(null);
     const itemsPerPage = 50;
+
+    // Save selectedItems to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+    }, [selectedItems]);
 
     // Fetch products from API
     useEffect(() => {
