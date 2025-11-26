@@ -20,7 +20,8 @@ const Home = () => {
             try {
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                 const res = await axios.get(`${apiUrl}/api/products`);
-                setProducts(res.data || []);
+                const sortedProducts = (res.data || []).sort((a, b) => a.id - b.id);
+                setProducts(sortedProducts);
             } catch (error) {
                 console.error('Error fetching products:', error);
                 setProducts([]);

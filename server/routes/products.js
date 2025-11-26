@@ -9,6 +9,7 @@ router.get('/:id', productController.getProductById);
 
 // Protected routes (admin only)
 router.post('/', auth, productController.createProduct);
+router.put('/reorder', auth, productController.reorderProducts);
 router.put('/:id', auth, productController.updateProduct);
 router.delete('/:id', auth, productController.deleteProduct);
 

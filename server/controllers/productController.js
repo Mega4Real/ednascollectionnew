@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await prisma.product.findMany({
-            orderBy: { createdAt: 'desc' }
+            orderBy: { position: 'asc' }
         });
         res.json(products);
     } catch (error) {
@@ -34,15 +34,28 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        const { imageUrl, videoUrl, price, sizes } = req.body;
+        const { id, imageUrl, videoUrl, price, sizes } = req.body;
+
+        // Get current max position to append new product at the end
+        const maxPosition = await prisma.product.aggregate({
+            _max: { position: true }
+        });
+        const nextPosition = (maxPosition._max.position || 0) + 1;
+
+        const productData = {
+            imageUrl,
+            videoUrl,
+            price: parseFloat(price),
+            sizes,
+            position: nextPosition
+        };
+
+        if (id) {
+            productData.id = parseInt(id);
+        }
 
         const product = await prisma.product.create({
-            data: {
-                imageUrl,
-                videoUrl,
-                price: parseFloat(price),
-                sizes
-            }
+            data: productData
         });
 
         res.status(201).json(product);
@@ -82,6 +95,27 @@ exports.deleteProduct = async (req, res) => {
         });
 
         res.json({ message: 'Product deleted' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+exports.reorderProducts = async (req, res) => {
+    try {
+        const { products } = req.body; // Array of { id, position }
+
+        // Use transaction to update all positions
+        await prisma.$transaction(
+            products.map(p =>
+                prisma.product.update({
+                    where: { id: p.id },
+                    data: { position: p.position }
+                })
+            )
+        );
+
+        res.json({ message: 'Products reordered successfully' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

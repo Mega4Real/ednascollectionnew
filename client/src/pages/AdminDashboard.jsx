@@ -36,7 +36,12 @@ const AdminDashboard = () => {
     };
 
     const handleInputChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        if (name === 'id') {
+            setFormData({ ...formData, id: value ? parseInt(value) : null });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     };
 
     const handleSizeChange = (size) => {
@@ -116,6 +121,38 @@ const AdminDashboard = () => {
         setFormData({ imageUrl: '', videoUrl: '', price: '', sizes: [] });
     };
 
+    const handleMove = async (index, direction) => {
+        const newProducts = [...products];
+        if (direction === 'up' && index > 0) {
+            [newProducts[index], newProducts[index - 1]] = [newProducts[index - 1], newProducts[index]];
+        } else if (direction === 'down' && index < newProducts.length - 1) {
+            [newProducts[index], newProducts[index + 1]] = [newProducts[index + 1], newProducts[index]];
+        } else {
+            return;
+        }
+
+        // Update local state immediately for UI responsiveness
+        setProducts(newProducts);
+
+        // Prepare payload for backend
+        const reorderedPayload = newProducts.map((product, idx) => ({
+            id: product.id,
+            position: idx
+        }));
+
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.put(`${apiUrl}/api/products/reorder`, { products: reorderedPayload }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (error) {
+            console.error('Error saving order', error);
+            alert('Failed to save new order');
+            fetchProducts(); // Revert on error
+        }
+    };
+
     return (
         <div className="admin-dashboard" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -128,6 +165,19 @@ const AdminDashboard = () => {
             <div className="add-product-section" style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
                 <h2>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem', maxWidth: '600px' }}>
+                    <div>
+                        <label>Product ID (Optional - Manual Override)</label>
+                        <input
+                            type="number"
+                            name="id"
+                            value={formData.id || ''}
+                            onChange={handleInputChange}
+                            placeholder="Leave empty for auto-generated ID"
+                            disabled={!!editingId} // Disable ID editing when updating
+                            style={{ width: '100%', padding: '0.5rem' }}
+                        />
+                    </div>
+
                     <div>
                         <label>Image URL (Direct Link)</label>
                         <input
@@ -238,7 +288,7 @@ const AdminDashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {products.map(product => (
+                            {products.map((product, index) => (
                                 <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
                                     <td style={{ padding: '1rem' }}>{product.id}</td>
                                     <td style={{ padding: '1rem' }}>
@@ -247,6 +297,20 @@ const AdminDashboard = () => {
                                     <td style={{ padding: '1rem' }}>₵{product.price.toFixed(2)}</td>
                                     <td style={{ padding: '1rem' }}>{product.sizes.join(', ')}</td>
                                     <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            onClick={() => handleMove(index, 'up')}
+                                            disabled={index === 0}
+                                            style={{ padding: '0.25rem 0.5rem', background: '#666', color: 'white', border: 'none', borderRadius: '4px', cursor: index === 0 ? 'not-allowed' : 'pointer', opacity: index === 0 ? 0.5 : 1 }}
+                                        >
+                                            ↑
+                                        </button>
+                                        <button
+                                            onClick={() => handleMove(index, 'down')}
+                                            disabled={index === products.length - 1}
+                                            style={{ padding: '0.25rem 0.5rem', background: '#666', color: 'white', border: 'none', borderRadius: '4px', cursor: index === products.length - 1 ? 'not-allowed' : 'pointer', opacity: index === products.length - 1 ? 0.5 : 1 }}
+                                        >
+                                            ↓
+                                        </button>
                                         <button
                                             onClick={() => handleEdit(product)}
                                             style={{ padding: '0.25rem 0.5rem', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
