@@ -11,6 +11,7 @@ const AdminDashboard = () => {
         sizes: []
     });
     const [loading, setLoading] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const navigate = useNavigate();
 
     const availableSizes = ['XS', 'S', 'M', 'L', 'XL', '8', '10', '12', '14'];
@@ -53,18 +54,32 @@ const AdminDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            await axios.post(`${apiUrl}/api/products`, {
-                ...formData,
-                price: parseFloat(formData.price)
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+
+            if (editingId) {
+                // Update existing product
+                await axios.put(`${apiUrl}/api/products/${editingId}`, {
+                    ...formData,
+                    price: parseFloat(formData.price)
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                alert('Product updated successfully');
+                setEditingId(null);
+            } else {
+                // Create new product
+                await axios.post(`${apiUrl}/api/products`, {
+                    ...formData,
+                    price: parseFloat(formData.price)
+                }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                alert('Product added successfully');
+            }
 
             setFormData({ imageUrl: '', videoUrl: '', price: '', sizes: [] });
             fetchProducts();
-            alert('Product added successfully');
         } catch (error) {
-            alert('Error adding product');
+            alert(editingId ? 'Error updating product' : 'Error adding product');
         } finally {
             setLoading(false);
         }
@@ -85,6 +100,22 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleEdit = (product) => {
+        setEditingId(product.id);
+        setFormData({
+            imageUrl: product.imageUrl || product.image,
+            videoUrl: product.videoUrl || product.video || '',
+            price: product.price.toString(),
+            sizes: product.sizes
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setFormData({ imageUrl: '', videoUrl: '', price: '', sizes: [] });
+    };
+
     return (
         <div className="admin-dashboard" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -95,7 +126,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="add-product-section" style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
-                <h2>Add New Product</h2>
+                <h2>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem', maxWidth: '600px' }}>
                     <div>
                         <label>Image URL (Direct Link)</label>
@@ -156,22 +187,40 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            padding: '0.75rem',
-                            background: '#ff69b4',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold',
-                            marginTop: '1rem'
-                        }}
-                    >
-                        {loading ? 'Adding...' : 'Add Product'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            style={{
+                                padding: '0.75rem',
+                                background: '#ff69b4',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                flex: 1
+                            }}
+                        >
+                            {loading ? (editingId ? 'Updating...' : 'Adding...') : (editingId ? 'Update Product' : 'Add Product')}
+                        </button>
+                        {editingId && (
+                            <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                style={{
+                                    padding: '0.75rem',
+                                    background: '#666',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
                 </form>
             </div>
 
@@ -197,7 +246,13 @@ const AdminDashboard = () => {
                                     </td>
                                     <td style={{ padding: '1rem' }}>₵{product.price.toFixed(2)}</td>
                                     <td style={{ padding: '1rem' }}>{product.sizes.join(', ')}</td>
-                                    <td style={{ padding: '1rem' }}>
+                                    <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                        <button
+                                            onClick={() => handleEdit(product)}
+                                            style={{ padding: '0.25rem 0.5rem', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                        >
+                                            Edit
+                                        </button>
                                         <button
                                             onClick={() => handleDelete(product.id)}
                                             style={{ padding: '0.25rem 0.5rem', background: 'red', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}

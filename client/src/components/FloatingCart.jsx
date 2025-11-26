@@ -23,7 +23,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem }) => {
         message += `Total: ₵${total.toFixed(2)}`;
 
         const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = "+233543806051";
+        const whatsappNumber = "+233540665045";
         const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 
         window.open(whatsappUrl, '_blank');
