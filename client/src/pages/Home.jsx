@@ -5,26 +5,25 @@ import ProductCard from '../components/ProductCard';
 import FloatingCart from '../components/FloatingCart';
 import Footer from '../components/Footer';
 import VideoModal from '../components/VideoModal';
-import initialDresses from '../data/dresses';
 
 const Home = () => {
-    const [products, setProducts] = useState(initialDresses);
+    const [products, setProducts] = useState([]);
     const [filters, setFilters] = useState({ price: '', size: '' });
     const [selectedItems, setSelectedItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [previewProduct, setPreviewProduct] = useState(null);
     const itemsPerPage = 50;
 
-    // Fetch products from API (future proofing)
+    // Fetch products from API
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/products');
-                if (res.data && res.data.length > 0) {
-                    setProducts(res.data);
-                }
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${apiUrl}/api/products`);
+                setProducts(res.data || []);
             } catch (error) {
-                console.log('Using local data fallback');
+                console.error('Error fetching products:', error);
+                setProducts([]);
             }
         };
         fetchProducts();
