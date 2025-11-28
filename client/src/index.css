@@ -127,6 +127,21 @@ header {
 
     .filters {
         flex-direction: row;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 0;
+        max-width: 160px;
+    }
+
+    .filter-group label {
+        font-size: 0.7rem;
+        margin-right: 0.25rem;
         display: block;
     }
 
@@ -164,10 +179,6 @@ header h1 {
 }
 
 /* Dark Mode Styles */
-body.dark-mode {
-    background-color: #121212;
-    color: #ffffff;
-}
 
 body.dark-mode header {
     background-color: #1e1e1e;
