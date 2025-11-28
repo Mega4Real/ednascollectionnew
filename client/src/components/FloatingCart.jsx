@@ -59,7 +59,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem }) => {
             >
                 <div className="cart-count">
                     <span id="selected-count">{selectedItems.length}</span>
-                    <span className="cart-label">Selected Items {isOpen ? '▼' : '▲'}</span>
+                    <span className="cart-label"><span className="cart-text">Items</span> {isOpen ? '▼' : '▲'}</span>
                 </div>
                 <div className="total-price" id="total-price">₵{total.toFixed(2)}</div>
             </div>
