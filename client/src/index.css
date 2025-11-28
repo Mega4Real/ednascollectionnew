@@ -136,13 +136,13 @@ header {
     .filter-group {
         flex: 1;
         min-width: 0;
-        max-width: 95px;
+        max-width: 110px;
     }
 
     .filter-group label {
         font-size: 0.7rem;
         margin-right: 0.25rem;
-        display: block;
+        display: none;
     }
 
     .filter-group select {
