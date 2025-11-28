@@ -27,13 +27,23 @@ const Header = ({ filters, setFilters, clearFilters }) => {
                     <label htmlFor="size-filter">Size:</label>
                     <select id="size-filter" value={filters.size} onChange={handleSizeChange}>
                         <option value="">All Sizes</option>
-                        <option value="XS">XS</option>
                         <option value="S">S</option>
                         <option value="M">M</option>
                         <option value="L">L</option>
                         <option value="XL">XL</option>
+                        <option value="6">6</option>
                         <option value="8">8</option>
+                        <option value="10">10</option>
                         <option value="12">12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                        <option value="6/8">6/8</option>
+                        <option value="8/10">8/10</option>
+                        <option value="10/12">10/12</option>
+                        <option value="12/14">12/14</option>
+                        <option value="14/16">14/16</option>
+                        <option value="16/18">16/18</option>
                     </select>
                 </div>
                 <button id="clear-filters" onClick={clearFilters}>Clear</button>

@@ -14,7 +14,7 @@ const AdminDashboard = () => {
     const [editingId, setEditingId] = useState(null);
     const navigate = useNavigate();
 
-    const availableSizes = ['XS', 'S', 'M', 'L', 'XL', '8', '10', '12', '14'];
+    const availableSizes = ['S', 'M', 'L', 'XL', '6', '8', '10', '12', '14', '16', '18', '6/8', '8/10', '10/12', '12/14', '14/16', '16/18'];
 
     const fetchProducts = async () => {
         try {
