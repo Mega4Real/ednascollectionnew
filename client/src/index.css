@@ -118,7 +118,7 @@ header {
 
 @media (max-width: 768px) {
     body {
-        padding-top: 8rem;
+        padding-top: 8.5rem;
     }
 
     header {
@@ -127,21 +127,6 @@ header {
 
     .filters {
         flex-direction: row;
-        gap: 0.5rem;
-        align-items: center;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .filter-group {
-        flex: 1;
-        min-width: 0;
-        max-width: 160px;
-    }
-
-    .filter-group label {
-        font-size: 0.7rem;
-        margin-right: 0.25rem;
         display: block;
     }
 
