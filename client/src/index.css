@@ -797,3 +797,52 @@ body.dark-mode .close-modal:hover {
 .dress-image {
     cursor: pointer;
 }
+
+/* Automatic Dark Mode Detection */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        color: #ffffff;
+    }
+
+    header {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        border-bottom-color: #ff69b4;
+    }
+
+    .filter-group label {
+        color: #ffffff;
+    }
+
+    .filter-group select {
+        background-color: #2a2a2a;
+        color: #ffffff;
+        border-color: #555;
+    }
+
+    #clear-filters {
+        background-color: #ff69b4;
+        color: #fff;
+    }
+
+    .dress-card {
+        background: #1e1e1e;
+        color: #ffffff;
+    }
+
+    .dress-price {
+        color: #ff69b4;
+    }
+
+    .floating-cart {
+        background: #1e1e1e;
+        color: #ffffff;
+    }
+
+    .site-footer {
+        background: #1e1e1e;
+        color: #ffffff;
+        border-top-color: #ff69b4;
+    }
+}
