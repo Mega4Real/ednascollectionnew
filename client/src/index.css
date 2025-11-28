@@ -8,7 +8,7 @@ body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
     background-color: #f4f4f4;
-    padding-top: 8rem;
+    padding-top: 9rem;
 }
 
 header {
@@ -118,7 +118,7 @@ header {
 
 @media (max-width: 768px) {
     body {
-        padding-top: 7.5rem;
+        padding-top: 8rem;
     }
 
     header {
@@ -136,7 +136,7 @@ header {
     .filter-group {
         flex: 1;
         min-width: 0;
-        max-width: 200px;
+        max-width: 160px;
     }
 
     .filter-group label {
