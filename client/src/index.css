@@ -257,12 +257,8 @@ body.dark-mode .footer-section h3 {
     color: #ff69b4;
 }
 
-body.dark-mode .footer-section h2 {
-    color: #ffffff;
-}
-
 body.dark-mode .footer-section p {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 body.dark-mode .footer-section a {
@@ -270,7 +266,7 @@ body.dark-mode .footer-section a {
 }
 
 body.dark-mode .footer-section .social-icon {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 body.dark-mode .modal-content {
@@ -528,7 +524,7 @@ body.dark-mode .close-modal:hover {
     margin: 0.5rem 0;
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #666;
+    color: #666666;
 }
 
 .footer-section a {
@@ -554,7 +550,7 @@ body.dark-mode .close-modal:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
     padding: 0.75rem 1rem;
     border-radius: 25px;
@@ -771,281 +767,297 @@ body.dark-mode .close-modal:hover {
     padding: 6px 10px;
     /* increase clickable area */
     border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    touch-action: manipulation;
-    /* improve responsiveness on mobile */
-}
 
-.close-modal:hover {
-    color: #000;
-    background: rgba(255, 255, 255, 1);
-}
-
-/* Extra ensure on small screens the close button is larger and stays above video controls */
-@media (max-width: 480px) {
-    .close-modal {
-        right: 10px;
-        top: 6px;
-        font-size: 40px;
-        padding: 8px 12px;
-    }
-}
-
-.preview-price {
-    font-size: 1.4rem;
-    color: #ff69b4;
-    margin-bottom: 1rem;
-}
-
-/* Make dress cards show pointer cursor */
-.dress-image {
-    cursor: pointer;
-}
-
-/* Automatic Dark Mode Detection */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #121212;
-        color: #ffffff;
-    }
-
-    header {
-        background-color: #1e1e1e;
-        color: #ffffff;
-        border-bottom-color: #ff69b4;
-    }
-
-    .filter-group label {
-        color: #ffffff;
-    }
-
-    .filter-group select {
-        background-color: #2a2a2a;
-        color: #ffffff;
-        border-color: #555;
-    }
-
-    #clear-filters {
-        background-color: #ff69b4;
-        color: #fff;
-    }
-
-    .dress-card {
-        background: #1e1e1e;
-        color: #ffffff;
+    .dress-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
     }
 
     .dress-price {
         color: #ff69b4;
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
     }
 
-    .dress-container {
-        grid-template-columns: repeat(2, 1fr);
+    .size-options {
+        display: flex;
         gap: 0.5rem;
-        padding: 0.5rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .dress-container {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.5rem;
-        padding: 0.5rem;
-    }
-}
-
-.dress-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.dress-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.dress-card.selected {
-    border: 3px solid #ff69b4;
-}
-
-.dress-image {
-    width: 100%;
-    height: 240px;
-    object-fit: cover;
-    border-radius: 8px;
-}
-
-.dress-info {
-    padding: 0rem 1rem;
-}
-
-.dress-title {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-}
-
-.dress-price {
-    color: #ff69b4;
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
-}
-
-.size-options {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.size-option {
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.size-option.selected {
-    background-color: #ff69b4;
-    color: white;
-    border-color: #ff69b4;
-}
-
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-}
-
-.modal-content {
-    position: relative;
-    background-color: white;
-    margin: 5% auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 800px;
-    border-radius: 8px;
-}
-
-.preview-video-container {
-    width: 100%;
-    height: 0;
-    padding-bottom: 56.25%;
-    /* 16:9 Aspect Ratio */
-    position: relative;
-}
-
-.preview-video-container video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 4px;
-}
-
-.close-modal {
-    position: absolute;
-    right: 14px;
-    top: 8px;
-    font-size: 34px;
-    /* larger tap target */
-    line-height: 1;
-    font-weight: bold;
-    color: #666;
-    cursor: pointer;
-    z-index: 1200;
-    /* ensure it's above video controls */
-    background: rgba(255, 255, 255, 0.9);
-    padding: 6px 10px;
-    /* increase clickable area */
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    touch-action: manipulation;
-    /* improve responsiveness on mobile */
-}
-
-.close-modal:hover {
-    color: #000;
-    background: rgba(255, 255, 255, 1);
-}
-
-/* Extra ensure on small screens the close button is larger and stays above video controls */
-@media (max-width: 480px) {
-    .close-modal {
-        right: 10px;
-        top: 6px;
-        font-size: 40px;
-        padding: 8px 12px;
-    }
-}
-
-.preview-price {
-    font-size: 1.4rem;
-    color: #ff69b4;
-    margin-bottom: 1rem;
-}
-
-/* Make dress cards show pointer cursor */
-.dress-image {
-    cursor: pointer;
-}
-
-/* Automatic Dark Mode Detection */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #121212;
-        color: #ffffff;
+        margin-bottom: 0.5rem;
     }
 
-    header {
-        background-color: #1e1e1e;
-        color: #ffffff;
-        border-bottom-color: #ff69b4;
+    .size-option {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
     }
 
-    .filter-group label {
-        color: #ffffff;
-    }
-
-    .filter-group select {
-        background-color: #2a2a2a;
-        color: #ffffff;
-        border-color: #555;
-    }
-
-    #clear-filters {
+    .size-option.selected {
         background-color: #ff69b4;
-        color: #fff;
+        color: white;
+        border-color: #ff69b4;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: white;
+        margin: 5% auto;
+        padding: 20px;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 8px;
+    }
+
+    .preview-video-container {
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%;
+        /* 16:9 Aspect Ratio */
+        position: relative;
+    }
+
+    .preview-video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 4px;
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 14px;
+        top: 8px;
+        font-size: 34px;
+        /* larger tap target */
+        line-height: 1;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        z-index: 1200;
+        /* ensure it's above video controls */
+        background: rgba(255, 255, 255, 0.9);
+        padding: 6px 10px;
+        /* increase clickable area */
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        touch-action: manipulation;
+        /* improve responsiveness on mobile */
+    }
+
+    .close-modal:hover {
+        color: #000;
+        background: rgba(255, 255, 255, 1);
+    }
+
+    /* Extra ensure on small screens the close button is larger and stays above video controls */
+    @media (max-width: 480px) {
+        .close-modal {
+            right: 10px;
+            top: 6px;
+            font-size: 40px;
+            padding: 8px 12px;
+        }
+    }
+
+    .preview-price {
+        padding-bottom: 56.25%;
+        /* 16:9 Aspect Ratio */
+        position: relative;
+    }
+
+    .preview-video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 4px;
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 14px;
+        top: 8px;
+        font-size: 34px;
+        /* larger tap target */
+        line-height: 1;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        z-index: 1200;
+        /* ensure it's above video controls */
+        background: rgba(255, 255, 255, 0.9);
+        padding: 6px 10px;
+        /* increase clickable area */
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        touch-action: manipulation;
+        /* improve responsiveness on mobile */
+    }
+
+    .close-modal:hover {
+        color: #000;
+        background: rgba(255, 255, 255, 1);
+    }
+
+    /* Extra ensure on small screens the close button is larger and stays above video controls */
+    @media (max-width: 480px) {
+        .close-modal {
+            right: 10px;
+            top: 6px;
+            font-size: 40px;
+            padding: 8px 12px;
+        }
+    }
+
+    .preview-price {
+        font-size: 1.4rem;
+        color: #ff69b4;
+        margin-bottom: 1rem;
     }
 
     .dress-card {
-        background: #1e1e1e;
-        color: #ffffff;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .dress-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .dress-card.selected {
+        border: 3px solid #ff69b4;
+    }
+
+    .dress-image {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .dress-info {
+        padding: 0rem 1rem;
+    }
+
+    .dress-title {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
     }
 
     .dress-price {
         color: #ff69b4;
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
     }
 
-    .floating-cart {
-        background: #1e1e1e;
-        color: #ffffff;
+    .size-options {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
-    .site-footer {
-        background: #1e1e1e;
-        color: #ffffff;
-        border-top-color: #ff69b4;
+    .size-option {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
     }
 
-    .footer-section h2 {
-        color: #ffffff;
+    .size-option.selected {
+        background-color: #ff69b4;
+        color: white;
+        border-color: #ff69b4;
     }
-}
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: white;
+        margin: 5% auto;
+        padding: 20px;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 8px;
+    }
+
+    /* Make dress cards show pointer cursor */
+    .dress-image {
+        cursor: pointer;
+    }
+
+    /* Automatic Dark Mode Detection */
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        header {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border-bottom-color: #ff69b4;
+        }
+
+        .filter-group label {
+            color: #ffffff;
+        }
+
+        .filter-group select {
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border-color: #555;
+        }
+
+        #clear-filters {
+            background-color: #ff69b4;
+            color: #fff;
+        }
+
+        /* Keep dress cards white */
+        .dress-card {
+            background: #ffffff;
+            color: #333;
+        }
+
+        .dress-price {
+            color: #ff69b4;
+        }
+
+        /* Force footer text and social icons to white */
+        .footer-section p {
+            color: #ffffff !important;
+        }
+
+        .footer-section .social-icon {
+            color: #ffffff !important;
+        }
+    }
