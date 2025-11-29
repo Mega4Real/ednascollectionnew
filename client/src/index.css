@@ -452,10 +452,42 @@ header h1 {
 
 .social-icon.whatsapp {
     background: #25d366;
+    color: #ffffff;
 }
 
 .social-icon.whatsapp:hover {
     background: #128c7e;
+    color: #ffffff;
+}
+
+.social-icon.snapchat {
+    background: #FFFC00;
+    color: #000000;
+}
+
+.social-icon.snapchat:hover {
+    background: #e6e300;
+    color: #000000;
+}
+
+.social-icon.tiktok {
+    background: #000000;
+    color: #ffffff;
+}
+
+.social-icon.tiktok:hover {
+    background: #333333;
+    color: #ffffff;
+}
+
+.social-icon.instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: #ffffff;
+}
+
+.social-icon.instagram:hover {
+    background: linear-gradient(45deg, #d67d2e 0%, #c75a33 25%, #b91f38 50%, #ad1e5a 75%, #a01477 100%);
+    color: #ffffff;
 }
 
 /* Responsive Footer */
