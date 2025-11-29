@@ -266,11 +266,15 @@ body.dark-mode .footer-section h2 {
 }
 
 body.dark-mode .footer-section p {
-    color: #cccccc;
+    color: #ffffff;
 }
 
 body.dark-mode .footer-section a {
     color: #ff69b4;
+}
+
+body.dark-mode .footer-section .social-icon {
+    color: #ffffff;
 }
 
 body.dark-mode .modal-content {
