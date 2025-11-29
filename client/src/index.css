@@ -136,7 +136,7 @@ header {
     .filter-group {
         flex: 1;
         min-width: 0;
-        max-width: 95px;
+        max-width: 120px;
     }
 
     .filter-group label {
@@ -146,7 +146,7 @@ header {
     }
 
     .filter-group select {
-        width: 100%;
+        width: 80%;
         height: 32px;
         font-size: 0.8rem;
         padding: 0.25rem;
