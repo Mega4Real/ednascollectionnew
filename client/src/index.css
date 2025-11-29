@@ -215,12 +215,8 @@ body.dark-mode #clear-filters:hover {
 }
 
 body.dark-mode .dress-card {
-    background: #1e1e1e;
-    color: #ffffff;
-}
-
-body.dark-mode .dress-price {
-    color: #ff69b4;
+    background: #ffffff;
+    color: #333;
 }
 
 body.dark-mode .size-option {
@@ -266,7 +262,7 @@ body.dark-mode .footer-section h2 {
 }
 
 body.dark-mode .footer-section p {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 body.dark-mode .footer-section a {
@@ -274,7 +270,7 @@ body.dark-mode .footer-section a {
 }
 
 body.dark-mode .footer-section .social-icon {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 body.dark-mode .modal-content {
