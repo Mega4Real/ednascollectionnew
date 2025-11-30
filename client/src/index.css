@@ -104,11 +104,11 @@ header {
 
 @media (max-width: 768px) {
     body {
-        padding-top: 4.5rem;
+        padding-top: 3.5rem;
     }
 
     .app-container {
-        padding-top: 4.5rem;
+        padding-top: 3.5rem;
     }
 
     header {
