@@ -37,7 +37,7 @@ exports.getProductById = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        const { id, imageUrl, videoUrl, price, sizes } = req.body;
+        const { imageUrl, videoUrl, price, sizes } = req.body;
 
         // Get current max position to append new product at the end
         const maxPosition = await prisma.product.aggregate({
@@ -52,10 +52,6 @@ exports.createProduct = async (req, res) => {
             sizes,
             position: nextPosition
         };
-
-        if (id) {
-            productData.id = parseInt(id);
-        }
 
         const product = await prisma.product.create({
             data: productData

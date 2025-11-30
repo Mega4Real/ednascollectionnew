@@ -37,11 +37,7 @@ const AdminDashboard = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        if (name === 'id') {
-            setFormData({ ...formData, id: value ? parseInt(value) : null });
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleSizeChange = (size) => {
@@ -165,19 +161,6 @@ const AdminDashboard = () => {
             <div className="add-product-section" style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
                 <h2>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem', maxWidth: '600px' }}>
-                    <div>
-                        <label>Product ID (Optional - Manual Override)</label>
-                        <input
-                            type="number"
-                            name="id"
-                            value={formData.id || ''}
-                            onChange={handleInputChange}
-                            placeholder="Leave empty for auto-generated ID"
-                            disabled={!!editingId} // Disable ID editing when updating
-                            style={{ width: '100%', padding: '0.5rem' }}
-                        />
-                    </div>
-
                     <div>
                         <label>Image URL (Direct Link)</label>
                         <input
