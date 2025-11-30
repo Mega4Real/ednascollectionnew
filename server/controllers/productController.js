@@ -7,6 +7,9 @@ exports.getAllProducts = async (req, res) => {
         const products = await prisma.product.findMany({
             orderBy: { position: 'asc' }
         });
+
+        // Cache for 5 minutes (300 seconds)
+        res.set('Cache-Control', 'public, max-age=300');
         res.json(products);
     } catch (error) {
         console.error(error);

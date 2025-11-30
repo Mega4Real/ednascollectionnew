@@ -27,13 +27,31 @@ const Home = () => {
         localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
     }, [selectedItems]);
 
-    // Fetch products from API
+    // Fetch products from API with caching
     useEffect(() => {
         const fetchProducts = async () => {
+            const CACHE_KEY = 'cachedProducts';
+            const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
             try {
                 setLoading(true);
+
+                // Check cache first
+                const cachedData = localStorage.getItem(CACHE_KEY);
+                if (cachedData) {
+                    const { products, timestamp } = JSON.parse(cachedData);
+                    const now = new Date().getTime();
+
+                    if (now - timestamp < CACHE_DURATION) {
+                        setProducts(products);
+                        setLoading(false);
+                        return;
+                    }
+                }
+
                 const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                 const res = await axios.get(`${apiUrl}/api/products`);
+
                 // Sort by position if available, otherwise by ID
                 const sortedProducts = (res.data || []).sort((a, b) => {
                     if (a.position !== undefined && b.position !== undefined) {
@@ -41,10 +59,25 @@ const Home = () => {
                     }
                     return a.id - b.id;
                 });
+
                 setProducts(sortedProducts);
+
+                // Update cache
+                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                    products: sortedProducts,
+                    timestamp: new Date().getTime()
+                }));
+
             } catch (error) {
                 console.error('Error fetching products:', error);
-                setProducts([]);
+                // Try to use stale cache if network fails
+                const cachedData = localStorage.getItem(CACHE_KEY);
+                if (cachedData) {
+                    const { products } = JSON.parse(cachedData);
+                    setProducts(products);
+                } else {
+                    setProducts([]);
+                }
             } finally {
                 setLoading(false);
             }
