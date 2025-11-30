@@ -270,7 +270,7 @@ const AdminDashboard = () => {
 
             <div className="product-list">
                 <h2>Product List ({products.length})</h2>
-                <div style={{ overflowX: 'auto' }}>
+                <div className="table-container">
                     <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
                         <thead>
                             <tr style={{ background: '#f4f4f4', textAlign: 'left' }}>
