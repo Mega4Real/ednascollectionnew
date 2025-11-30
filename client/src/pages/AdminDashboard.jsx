@@ -26,6 +26,12 @@ const AdminDashboard = () => {
         }
     };
 
+    // Helper function to clear product cache
+    const clearProductCache = () => {
+        localStorage.removeItem('cachedProducts');
+        console.log('Product cache cleared');
+    };
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -77,6 +83,9 @@ const AdminDashboard = () => {
                 alert('Product added successfully');
             }
 
+            // Clear cache so changes reflect on client side
+            clearProductCache();
+
             setFormData({ imageUrl: '', videoUrl: '', price: '', sizes: [] });
             fetchProducts();
         } catch (error) {
@@ -95,6 +104,7 @@ const AdminDashboard = () => {
             await axios.delete(`${apiUrl}/api/products/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            clearProductCache();
             fetchProducts();
         } catch (error) {
             alert('Error deleting product');
@@ -142,6 +152,7 @@ const AdminDashboard = () => {
             await axios.put(`${apiUrl}/api/products/reorder`, { products: reorderedPayload }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            clearProductCache();
         } catch (error) {
             console.error('Error saving order', error);
             alert('Failed to save new order');

@@ -31,7 +31,7 @@ const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             const CACHE_KEY = 'cachedProducts';
-            const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+            const CACHE_DURATION = 60 * 1000; // 1 minute
 
             try {
                 setLoading(true);

@@ -8,8 +8,8 @@ exports.getAllProducts = async (req, res) => {
             orderBy: { position: 'asc' }
         });
 
-        // Cache for 5 minutes (300 seconds)
-        res.set('Cache-Control', 'public, max-age=300');
+        // Cache for 1 minute (60 seconds) with must-revalidate
+        res.set('Cache-Control', 'public, max-age=60, must-revalidate');
         res.json(products);
     } catch (error) {
         console.error(error);
