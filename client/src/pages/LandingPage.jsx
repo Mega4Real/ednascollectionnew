@@ -26,6 +26,8 @@ const LandingPage = () => {
                 muted
                 loop
                 playsInline
+                preload="auto"
+                poster={isMobile ? '/p2.png' : '/p1.png'}
                 key={isMobile ? 'mobile' : 'desktop'}
             >
                 <source src={isMobile ? '/L1.mp4' : '/L2.mp4'} type="video/mp4" />
