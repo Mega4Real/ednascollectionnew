@@ -725,6 +725,9 @@ header h1 {
     align-items: center;
     justify-content: center;
     background-color: #1a1a1a;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .landing-video {
@@ -762,6 +765,21 @@ header h1 {
     color: #fff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     letter-spacing: 2px;
+    animation: slideInLeft 1.2s ease-out, textGlow 2s ease-in-out infinite alternate;
+}
+
+.landing-motto {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #ff69b4, #ffd700, #ff69b4);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    animation: slideInRight 1.2s ease-out, gradientShift 3s ease infinite;
 }
 
 .landing-subtitle {
@@ -810,10 +828,65 @@ header h1 {
     }
 }
 
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes textGlow {
+    from {
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    to {
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8),
+            0 0 30px rgba(255, 105, 180, 0.6),
+            2px 2px 8px rgba(0, 0, 0, 0.7);
+    }
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 /* Responsive Landing Page */
 @media (max-width: 768px) {
     .landing-title {
         font-size: 2.5rem;
+    }
+
+    .landing-motto {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
     }
 
     .landing-subtitle {
@@ -830,6 +903,11 @@ header h1 {
 @media (max-width: 480px) {
     .landing-title {
         font-size: 2rem;
+    }
+
+    .landing-motto {
+        font-size: 1rem;
+        margin-bottom: 1.2rem;
     }
 
     .landing-subtitle {

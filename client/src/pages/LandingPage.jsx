@@ -19,26 +19,15 @@ const LandingPage = () => {
     };
 
     return (
-        <div className="landing-page">
-            <video
-                className="landing-video"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                poster={isMobile ? '/p2.png' : '/p1.png'}
-                key={isMobile ? 'mobile' : 'desktop'}
-            >
-                <source src={isMobile ? '/L1.mp4' : '/L2.mp4'} type="video/mp4" />
-                Your browser does not support the video tag.
-            </video>
-
+        <div
+            className="landing-page"
+            style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.png' : '/landing-bg.png'})` }}
+        >
             <div className="landing-overlay"></div>
 
             <div className="landing-content">
-
-                <p className="landing-subtitle">Discover Your Perfect Style</p>
+                <h1 className="landing-title">Ednas Collections</h1>
+                <p className="landing-motto">Your Authentic Dress Plug</p>
                 <button className="landing-button" onClick={handleEnter}>
                     Shop Now
                 </button>
