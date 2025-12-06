@@ -3,7 +3,7 @@
     font-family: 'Amsterdam One';
     font-style: normal;
     font-weight: 400;
-    font-display: swap;
+    font-display: block;
     src: url('/fonts/AmsterdamOne-eZ12l.ttf') format('truetype');
 }
 
