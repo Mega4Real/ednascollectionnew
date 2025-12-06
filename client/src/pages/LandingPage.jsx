@@ -26,7 +26,7 @@ const LandingPage = () => {
             <div className="landing-overlay"></div>
 
             <div className="landing-content">
-                <h1 className="landing-title">Ednas Collections</h1>
+                <h1 className="landing-title">Erdnas Collections</h1>
                 <p className="landing-motto">Your Authentic Dress Plug</p>
                 <button className="landing-button" onClick={handleEnter}>
                     Shop Now
