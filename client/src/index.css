@@ -119,11 +119,11 @@ header {
 
 @media (max-width: 768px) {
     body {
-        padding-top: 3.2rem;
+        padding-top: 2.5rem;
     }
 
     .app-container {
-        padding-top: 3.2rem;
+        padding-top: 2.5rem;
     }
 
     header {
@@ -193,8 +193,8 @@ header h1:hover {
 
 @media (max-width: 768px) {
     header h1 {
-        padding: 0.1rem 0;
-        font-size: 1.5rem;
+        padding-top: 0.5rem;
+        font-size: 1rem;
     }
 }
 
