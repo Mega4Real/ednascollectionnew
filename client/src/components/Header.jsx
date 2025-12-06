@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Header = ({ filters, setFilters, clearFilters }) => {
     const handlePriceChange = (e) => {
@@ -11,7 +12,9 @@ const Header = ({ filters, setFilters, clearFilters }) => {
 
     return (
         <header>
-            <h1>Erdnas Collections</h1>
+            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <h1>Erdnas Collections</h1>
+            </Link>
             <div className="filters">
                 <div className="filter-group">
                     <label htmlFor="price-filter">Price:</label>
