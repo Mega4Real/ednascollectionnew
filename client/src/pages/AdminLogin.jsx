@@ -33,17 +33,15 @@ const AdminLogin = () => {
             flexDirection: 'column'
         }}>
             <h2>Admin Login</h2>
-            <form onSubmit={handleSubmit} style={{
+            <form onSubmit={handleSubmit} className="login-form" style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '1rem',
                 gap: '1rem',
                 width: '100%',
                 maxWidth: '300px',
                 padding: '2rem',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                borderRadius: '8px',
-                background: 'white'
+                borderRadius: '8px'
             }}>
                 {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
 

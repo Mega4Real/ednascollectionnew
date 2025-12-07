@@ -1078,6 +1078,71 @@ body.dark-mode .footer-section p {
     }
 }
 
+/* Admin Dashboard Styles */
+.add-product-section {
+    background: white;
+}
+
+.product-list table {
+    background: white;
+}
+
+.product-list th {
+    background: #f4f4f4;
+}
+
+/* Admin Dark Mode Overrides */
+body.dark-mode .add-product-section {
+    background: black;
+    border: 1px solid white;
+}
+
+body.dark-mode .product-list table {
+    background: black;
+    border: 1px solid white;
+}
+
+body.dark-mode .product-list th {
+    background: black;
+    color: white;
+    border-bottom: 1px solid white;
+}
+
+body.dark-mode .product-list tr {
+    border-bottom: 1px solid white;
+}
+
+body.dark-mode .product-list td {
+    color: white;
+    border-bottom: 1px solid white;
+}
+
+body.dark-mode .admin-dashboard h1,
+body.dark-mode .admin-dashboard h2,
+body.dark-mode .add-product-section label {
+    color: white;
+}
+
+/* Admin Login Styles */
+.login-form {
+    background: white;
+}
+
+/* Admin Login Dark Mode */
+body.dark-mode .login-form {
+    background: black !important;
+    border: 1px solid white;
+}
+
+body.dark-mode .login-form label {
+    color: white;
+}
+
+body.dark-mode .login-container h2 {
+    color: white;
+    /* Ensure heading is white */
+}
+
 @media (max-width: 480px) {
     .landing-title {
         font-size: 2rem;

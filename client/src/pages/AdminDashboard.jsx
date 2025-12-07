@@ -169,7 +169,7 @@ const AdminDashboard = () => {
                 </button>
             </div>
 
-            <div className="add-product-section" style={{ background: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+            <div className="add-product-section" style={{ padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
                 <h2>{editingId ? 'Edit Product' : 'Add New Product'}</h2>
                 <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem', maxWidth: '600px' }}>
                     <div>
@@ -271,9 +271,9 @@ const AdminDashboard = () => {
             <div className="product-list">
                 <h2>Product List ({products.length})</h2>
                 <div className="table-container">
-                    <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ background: '#f4f4f4', textAlign: 'left' }}>
+                            <tr style={{ textAlign: 'left' }}>
                                 <th style={{ padding: '1rem' }}>ID</th>
                                 <th style={{ padding: '1rem' }}>Image</th>
                                 <th style={{ padding: '1rem' }}>Price</th>
