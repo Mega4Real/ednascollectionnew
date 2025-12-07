@@ -12,6 +12,28 @@ html {
     height: -webkit-fill-available;
 }
 
+/* CSS Variables for Theming */
+:root {
+    --bg-main: #f4f4f4;
+    --bg-card: #ffffff;
+    --bg-item: #f9f9f9;
+    --text-main: #333333;
+    --text-secondary: #666666;
+    --accent: #ff69b4;
+    --border: #dddddd;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode {
+    --bg-main: #121212;
+    --bg-card: #1e1e1e;
+    --bg-item: #2d2d2d;
+    --text-main: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --border: #333333;
+    --shadow: rgba(0, 0, 0, 0.3);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -21,8 +43,10 @@ html {
 body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
-    background-color: #f4f4f4;
+    background-color: var(--bg-main);
+    color: var(--text-main);
     height: -webkit-fill-available;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
@@ -30,8 +54,8 @@ body {
 }
 
 header {
-    background-color: #fff;
-    color: #333;
+    background-color: var(--bg-card);
+    color: var(--text-main);
     padding: 0.5rem;
     text-align: center;
     border-bottom: 3px solid #ff69b4;
@@ -76,7 +100,7 @@ header {
     width: auto;
     min-width: 140px;
     height: auto;
-    background-color: #f9f9f9;
+    background-color: var(--bg-item);
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
     cursor: pointer;
@@ -92,7 +116,8 @@ header {
     outline: none;
     border-color: #ff69b4;
     box-shadow: 0 2px 12px rgba(255, 105, 180, 0.15);
-    background-color: #fff;
+
+
 }
 
 #clear-filters {
@@ -116,6 +141,21 @@ header {
     transform: translateY(-1px);
     box-shadow: 0 4px 10px rgba(255, 105, 180, 0.2);
 }
+
+/* Dark Mode Overrides for Filters */
+body.dark-mode .filter-group select {
+    color: white;
+}
+
+body.dark-mode #clear-filters {
+    color: white;
+
+}
+
+body.dark-mode .filter-group label {
+    color: white;
+}
+
 
 @media (max-width: 768px) {
     body {
@@ -200,117 +240,159 @@ header h1:hover {
 
 
 
-.floating-cart {
+/* Floating Cart (FAB Style) */
+.floating-cart-wrapper {
     position: fixed;
     bottom: 15px;
     right: 15px;
-    width: 170px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 10px;
     z-index: 1000;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 1;
-    visibility: visible;
+    display: flex;
+    flex-direction: column-reverse;
+    /* Popup above button */
+    align-items: flex-end;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.floating-cart.hide-cart {
+.floating-cart-wrapper.hide {
     opacity: 0;
-    visibility: hidden;
-    transform: translateY(20px);
     pointer-events: none;
+    transform: translateY(20px);
 }
 
-.floating-cart:hover {
-    transform: translateY(-5px);
+.cart-fab {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    /* Pink */
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.cart-header {
+.cart-fab:hover {
+    transform: scale(1.1);
+}
+
+.cart-fab.active {
+    display: none;
+}
+
+.cart-icon svg {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2px;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #ff3333;
+    color: white;
+    border-radius: 50%;
+    min-width: 15px;
+    height: 15px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Cart Popup */
+.cart-popup {
+    position: absolute;
+    /* Above the FAB */
+    right: 0;
+    width: 170px;
+    /* Reduced from 320px */
+    background: var(--bg-card);
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem;
+    /* Slightly reduced padding */
+    animation: popupSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid var(--border);
+}
+
+@keyframes popupSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.cart-popup-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #f0f0f0;
+    align-items: flex-start;
+    /* Align top */
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    cursor: pointer;
+    /* Clickable */
 }
 
-.cart-count {
+.header-left {
     display: flex;
     flex-direction: column;
 }
 
-#selected-count {
-    font-size: 20px;
+.header-count {
+    color: var(--accent);
+    font-size: 0.9rem;
     font-weight: bold;
-    color: #ff69b4;
+    line-height: 1;
 }
 
-.cart-label {
-    font-size: 12px;
-    color: #666;
+.header-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 2px;
 }
 
-@media (max-width: 480px) {
-    .floating-cart {
-        width: auto;
-        min-width: 120px;
-        padding: 8px;
-        bottom: 10px;
-        right: 10px;
-    }
-
-    .cart-text {
-        display: none;
-    }
-
-    .cart-header {
-        margin-bottom: 5px;
-        padding-bottom: 5px;
-    }
-
-    #selected-count {
-        font-size: 16px;
-    }
-
-    .total-price {
-        font-size: 14px;
-    }
-}
-
-.total-price {
-    font-size: 16px;
+.header-total {
+    color: var(--accent);
+    font-size: 1rem;
     font-weight: bold;
-    color: #ff69b4;
+    align-self: center;
+    /* Vertically center with the left block */
 }
 
+/* Reuse existing item styles but update vars */
 .selected-items {
-    max-height: 200px;
+    max-height: 220px;
+    /* Fits approx 3 items */
     overflow-y: auto;
-    margin-bottom: 15px;
+    margin-bottom: 0.5rem;
 }
 
 .selected-item {
     display: flex;
     align-items: center;
-    padding: 8px;
+    padding: 0.5rem;
     border-radius: 8px;
-    margin-bottom: 8px;
-    background: #f8f8f8;
-    animation: slideIn 0.3s ease;
+    background: var(--bg-item);
+    margin-bottom: 0.5rem;
     position: relative;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+    /* transition */
 }
 
 .selected-item img {
@@ -322,25 +404,27 @@ header h1:hover {
 }
 
 .item-details {
-    flex: 1;
+    /* Removed flex: 1 to keep elements closer */
+    margin-right: 0.5rem;
 }
 
 .item-size {
     font-size: 0.7rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .item-price {
     font-size: 0.7rem;
     font-weight: bold;
-    color: #ff69b4;
+    color: var(--accent);
 }
 
 .delete-item {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background: #ff69b4;
+    top: 0;
+    right: 0;
+    /* Was absolute */
+    background: var(--accent);
     color: white;
     border: none;
     border-radius: 50%;
@@ -352,6 +436,7 @@ header h1:hover {
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s ease;
+    flex-shrink: 0;
 }
 
 .delete-item:hover {
@@ -364,14 +449,19 @@ header h1:hover {
     color: white;
     border: none;
     padding: 12px;
+    /* Reduced padding */
     border-radius: 8px;
     cursor: pointer;
     font-size: 12px;
+    /* Force small font */
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
+    /* Reduced gap */
     transition: background-color 0.3s ease;
+    white-space: nowrap;
+    /* Prevent wrapping */
 }
 
 #send-to-whatsapp:hover:not(:disabled) {
@@ -384,10 +474,67 @@ header h1:hover {
 }
 
 .whatsapp-icon {
-    font-size: 20px;
+    font-size: 16px;
 }
 
-/* Scrollbar styling for selected items */
+.cart-popup-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 0rem;
+}
+
+.total-row {
+    display: flex;
+    justify-content: flex-start;
+    /* Changed from space-between */
+    gap: 0.5rem;
+    /* Small gap between label and price */
+    align-items: center;
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+}
+
+.total-amount {
+    color: var(--accent);
+}
+
+/* Mobile Response */
+@media (max-width: 480px) {
+    .cart-popup {
+        width: 170px;
+        /* Match desktop compact width */
+        right: 0;
+        padding: 0.75rem;
+
+        /* Consitent spacing */
+    }
+
+    .selected-items {
+        max-height: 200px;
+    }
+
+    .cart-popup-header h4 {
+        font-size: 1rem;
+    }
+
+    .selected-item img {
+        width: 35px;
+        /* Smaller thumbnails */
+        height: 45px;
+    }
+
+    .total-row {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    #send-to-whatsapp {
+        padding: 10px;
+        font-size: 12px;
+    }
+}
+
 .selected-items::-webkit-scrollbar {
     width: 6px;
 }
@@ -397,7 +544,7 @@ header h1:hover {
 }
 
 .selected-items::-webkit-scrollbar-thumb {
-    background: #ff69b4;
+    background: var(--accent);
     border-radius: 3px;
 }
 
@@ -407,8 +554,8 @@ header h1:hover {
 
 /* Footer Styles */
 .site-footer {
-    background: #fff;
-    color: #333;
+    background: var(--bg-card);
+    color: var(--text-main);
     padding: 1rem 0 1rem 0;
     margin-top: 0rem;
     border-top: 3px solid #ff69b4;
@@ -442,7 +589,11 @@ header h1:hover {
     margin: 0.5rem 0;
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #666666;
+    color: black;
+}
+
+body.dark-mode .footer-section p {
+    color: white;
 }
 
 .footer-section a {
@@ -563,9 +714,9 @@ header h1:hover {
 
 .pagination button {
     padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    background-color: white;
-    color: #333;
+    border: 1px solid var(--border);
+    background-color: var(--bg-card);
+    color: var(--text-main);
     cursor: pointer;
     border-radius: 4px;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -605,7 +756,7 @@ header h1:hover {
 }
 
 .dress-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -664,12 +815,12 @@ header h1:hover {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .modal-content {
     position: relative;
-    background-color: white;
+    background-color: var(--bg-card);
     margin: 5% auto;
     padding: 20px;
     width: 80%;

@@ -30,43 +30,82 @@ const FloatingCart = ({ selectedItems, onRemoveItem }) => {
         window.open(whatsappUrl, '_blank');
     };
 
+    // Close on click outside or scroll
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (cartRef.current && !cartRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+
+        const handleScroll = () => {
+            setIsOpen(false);
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            window.addEventListener('scroll', handleScroll, { passive: true });
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [isOpen]);
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 setIsVisible(!entry.isIntersecting);
             },
-            { threshold: 0, rootMargin: '50px' }
+            { threshold: 0, rootMargin: '50px' } // Increased margin slightly
         );
 
-        const footer = document.querySelector('.site-footer');
-        if (footer) {
-            observer.observe(footer);
+        const targetSection = document.querySelector('.social-links');
+        if (targetSection) {
+            observer.observe(targetSection);
         }
 
         return () => {
-            if (footer) observer.unobserve(footer);
+            if (targetSection) observer.unobserve(targetSection);
         };
     }, []);
 
+    // If empty, hide the cart completely
     if (selectedItems.length === 0) return null;
 
     return (
-        <div className={`floating-cart ${!isVisible ? 'hide-cart' : ''}`} ref={cartRef}>
-            <div
-                className="cart-header"
+        <div className={`floating-cart-wrapper ${!isVisible ? 'hide' : ''}`} ref={cartRef}>
+            {/* Round Toggle Button (FAB) */}
+            <button
+                className={`cart-fab ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
-                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                aria-label="Toggle Cart"
             >
-                <div className="cart-count">
-                    <span id="selected-count">{selectedItems.length}</span>
-                    <span className="cart-label"><span className="cart-text">Items</span> {isOpen ? '▼' : '▲'}</span>
+                <div className="cart-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
                 </div>
-                <div className="total-price" id="total-price">₵{total.toFixed(2)}</div>
-            </div>
+                <span className="cart-badge">{selectedItems.length}</span>
+            </button>
 
+            {/* Expanded Content (Popup) */}
             {isOpen && (
-                <>
-                    <div className="selected-items" id="selected-items">
+                <div className="cart-popup">
+                    <div className="cart-popup-header" onClick={() => setIsOpen(false)}>
+                        <div className="header-left">
+                            <span className="header-count">{selectedItems.length}</span>
+                            <span className="header-label">Items</span>
+                        </div>
+                        <div className="header-total">
+                            ₵{total.toFixed(2)}
+                        </div>
+                    </div>
+
+                    <div className="selected-items">
                         {selectedItems.map(item => (
                             <div key={`${item.id}-${item.selectedSize}`} className="selected-item">
                                 <img src={item.imageUrl || item.image} alt={`Dress ${item.id}`} />
@@ -86,15 +125,18 @@ const FloatingCart = ({ selectedItems, onRemoveItem }) => {
                             </div>
                         ))}
                     </div>
-                    <button
-                        id="send-to-whatsapp"
-                        disabled={selectedItems.length === 0}
-                        onClick={handleSendToWhatsApp}
-                    >
-                        <span className="whatsapp-icon">📱</span>
-                        Send to WhatsApp
-                    </button>
-                </>
+
+                    <div className="cart-popup-footer">
+                        <button
+                            id="send-to-whatsapp"
+                            disabled={selectedItems.length === 0}
+                            onClick={handleSendToWhatsApp}
+                        >
+                            <span className="whatsapp-icon">📱</span>
+                            Send to WhatsApp
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     );
