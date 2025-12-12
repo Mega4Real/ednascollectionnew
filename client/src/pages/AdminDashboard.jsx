@@ -19,7 +19,8 @@ const AdminDashboard = () => {
     const fetchProducts = async () => {
         try {
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const res = await axios.get(`${apiUrl}/api/products`);
+            // Add timestamp to prevent caching
+            const res = await axios.get(`${apiUrl}/api/products?_t=${Date.now()}`);
             setProducts(res.data);
         } catch (error) {
             console.error('Error fetching products', error);
