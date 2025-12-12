@@ -21,7 +21,7 @@ const LandingPage = () => {
     return (
         <div
             className="landing-page"
-            style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.png' : '/landing-bg.png'})` }}
+            style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.webp' : '/landing-bg.webp'})` }}
         >
             <div className="landing-overlay"></div>
 
