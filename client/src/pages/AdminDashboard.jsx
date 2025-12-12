@@ -269,7 +269,12 @@ const AdminDashboard = () => {
             </div>
 
             <div className="product-list">
-                <h2>Product List ({products.length})</h2>
+                <h2 style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    Product List ({products.length})
+                    <span style={{ fontWeight: 'normal', color: '#ffffffff' }}>
+                        | Total Price: ₵{products.reduce((sum, product) => sum + product.price, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                </h2>
                 <div className="table-container">
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>

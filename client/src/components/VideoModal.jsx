@@ -1,9 +1,54 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 const VideoModal = ({ product, onClose }) => {
     const videoRef = useRef(null);
 
     if (!product) return null;
+
+    // Auto-enter fullscreen and play with sound when modal opens
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const enterFullscreen = async () => {
+            try {
+                // Unmute and play the video
+                video.muted = false;
+                video.volume = 1.0;
+
+                // Play the video first
+                await video.play();
+
+                // Request fullscreen - works on both iOS and Android
+                if (video.requestFullscreen) {
+                    await video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    // Safari/iOS
+                    await video.webkitRequestFullscreen();
+                } else if (video.webkitEnterFullscreen) {
+                    // iOS Safari (older versions)
+                    video.webkitEnterFullscreen();
+                } else if (video.mozRequestFullScreen) {
+                    // Firefox
+                    await video.mozRequestFullScreen();
+                } else if (video.msRequestFullscreen) {
+                    // IE/Edge
+                    await video.msRequestFullscreen();
+                }
+            } catch (error) {
+                console.log('Fullscreen request failed:', error);
+                // Fallback: just play with sound if fullscreen fails
+                video.muted = false;
+                video.volume = 1.0;
+                video.play().catch(e => console.log('Play failed:', e));
+            }
+        };
+
+        // Small delay to ensure video is loaded
+        const timer = setTimeout(enterFullscreen, 100);
+
+        return () => clearTimeout(timer);
+    }, [product]);
 
     const handleBackdropClick = (e) => {
         if (e.target.classList.contains('modal')) {
@@ -36,9 +81,10 @@ const VideoModal = ({ product, onClose }) => {
                     <video
                         id="preview-video"
                         controls
+                        controlsList="nodownload"
                         autoPlay
-                        muted
                         loop
+                        playsInline
                         ref={videoRef}
                         onError={handleError}
                     >

@@ -14,7 +14,16 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
 
     const handleSizeClick = (e, size) => {
         e.stopPropagation();
-        setSelectedSize(size);
+
+        // Toggle behavior: if clicking the same size, deselect everything
+        if (selectedSize === size) {
+            setSelectedSize(null);
+            onToggleSelect(product, null); // Remove from cart
+        } else {
+            // Select the size and add to cart
+            setSelectedSize(size);
+            onToggleSelect(product, size); // Add to cart with selected size
+        }
     };
 
     const handleImageClick = (e) => {
