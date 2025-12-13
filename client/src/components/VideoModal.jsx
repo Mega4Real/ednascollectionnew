@@ -83,7 +83,6 @@ const VideoModal = ({ product, onClose }) => {
                         controls
                         controlsList="nodownload"
                         autoPlay
-                        loop
                         playsInline
                         ref={videoRef}
                         onError={handleError}
