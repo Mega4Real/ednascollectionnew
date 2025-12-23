@@ -435,8 +435,7 @@ header h1:hover {
 }
 
 .cart-summary-new {
-    padding: 1.5rem;
-    padding-top: 0rem;
+    padding: 0 1.5rem 5rem 1.5rem;
     border-top: 1px solid #f0f0f0;
     background: #fff;
 }
@@ -979,7 +978,7 @@ header h1:hover {
 @media (max-width: 768px) {
     .hero-section {
         min-height: 800px;
-        margin-top: -12rem;
+        margin-top: -8rem;
     }
 
     .hero-content {
