@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Header = ({ filters, setFilters, clearFilters }) => {
+const Header = ({ filters, setFilters, clearFilters, onLogoClick }) => {
     const handlePriceChange = (e) => {
         setFilters({ ...filters, price: e.target.value });
     };
@@ -12,7 +12,17 @@ const Header = ({ filters, setFilters, clearFilters }) => {
 
     return (
         <header>
-            <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link
+                to="/"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                onClick={(e) => {
+                    if (onLogoClick) {
+                        e.preventDefault();
+                        onLogoClick();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }}
+            >
                 <h1>Erdnas Collections</h1>
             </Link>
             <div className="filters">

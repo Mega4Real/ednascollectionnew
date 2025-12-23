@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
 import FloatingCart from '../components/FloatingCart';
 import Footer from '../components/Footer';
 import VideoModal from '../components/VideoModal';
 
 const Home = () => {
-    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [filters, setFilters] = useState({ price: '', size: '' });
 
@@ -23,45 +22,6 @@ const Home = () => {
     const itemsPerPage = 50;
 
     const [loading, setLoading] = useState(true);
-
-    // Inactivity timer - redirect to landing page after 1 hour of inactivity
-    useEffect(() => {
-        const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 1 hour in milliseconds
-        let inactivityTimer;
-
-        const resetTimer = () => {
-            // Clear existing timer
-            if (inactivityTimer) {
-                clearTimeout(inactivityTimer);
-            }
-
-            // Set new timer
-            inactivityTimer = setTimeout(() => {
-                navigate('/');
-            }, INACTIVITY_TIMEOUT);
-        };
-
-        // Activity events to monitor
-        const activityEvents = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
-
-        // Add event listeners for all activity events
-        activityEvents.forEach(event => {
-            window.addEventListener(event, resetTimer);
-        });
-
-        // Initialize timer on mount
-        resetTimer();
-
-        // Cleanup on unmount
-        return () => {
-            if (inactivityTimer) {
-                clearTimeout(inactivityTimer);
-            }
-            activityEvents.forEach(event => {
-                window.removeEventListener(event, resetTimer);
-            });
-        };
-    }, [navigate]);
 
     // Save selectedItems to localStorage whenever it changes
     useEffect(() => {
@@ -182,6 +142,11 @@ const Home = () => {
         setSelectedItems(prev => prev.filter(item => item.id !== id));
     };
 
+    const handleClearCart = () => {
+        setSelectedItems([]);
+        localStorage.removeItem('selectedItems');
+    };
+
     const clearFilters = () => {
         setFilters({ price: '', size: '' });
     };
@@ -208,15 +173,37 @@ const Home = () => {
         return pages;
     };
 
+    const [showHero, setShowHero] = useState(true);
+
+    const handleEnterShop = () => {
+        setShowHero(false);
+        window.scrollTo({ top: 0, behavior: 'auto' });
+    };
+
+    // Hide hero if scrolled past a certain point
+    useEffect(() => {
+        const handleScroll = () => {
+            if (showHero && window.scrollY > 300) {
+                setShowHero(false);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [showHero]);
+
     return (
         <div className="app-container">
             <Header
                 filters={filters}
                 setFilters={setFilters}
                 clearFilters={clearFilters}
+                onLogoClick={() => setShowHero(true)}
             />
 
             <main>
+                {showHero && <Hero onEnterShop={handleEnterShop} />}
                 <div className="dress-container">
                     {loading ? (
                         <div style={{
@@ -277,6 +264,7 @@ const Home = () => {
             <FloatingCart
                 selectedItems={selectedItems}
                 onRemoveItem={handleRemoveItem}
+                onClearCart={handleClearCart}
             />
 
             <Footer />

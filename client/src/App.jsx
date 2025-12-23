@@ -1,6 +1,5 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
 import Home from './pages/Home';
 import './index.css';
 
@@ -17,34 +16,13 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
-  // Automatic Dark Mode Logic
-  useEffect(() => {
-    const checkTime = () => {
-      const now = new Date();
-      const hours = now.getHours();
-      // Enable dark mode between 7 PM (19:00) and 6 AM (06:00)
-      if (hours >= 19 || hours < 6) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-    };
-
-    // Check immediately on load
-    checkTime();
-
-    // Check every minute to update if the time boundary is crossed
-    const interval = setInterval(checkTime, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <Router>
       <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>}>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/shop" element={<Home />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Navigate to="/" replace />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route
             path="/admin/dashboard"
@@ -59,5 +37,6 @@ function App() {
     </Router>
   );
 }
+
 
 export default App;
