@@ -125,11 +125,17 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         message += `Total: ₵${total.toFixed(2)}`;
 
         const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = "233274883478"; // Removed the '+' for better compatibility
-        const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+        const whatsappNumber = "233274883478";
+
+        // Detect if the user is on a mobile device
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // Use the direct app protocol for mobile, fallback to web API for desktop
+        const whatsappUrl = isMobile
+            ? `whatsapp://send?phone=${whatsappNumber}&text=${encodedMessage}`
+            : `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
 
         // Using window.location.assign instead of window.open to bypass mobile popup blockers
-        // especially after an async call like handleCreateOrder
         window.location.assign(whatsappUrl);
 
         // Clear cart and close panel
