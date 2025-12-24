@@ -125,10 +125,12 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         message += `Total: ₵${total.toFixed(2)}`;
 
         const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = "+233274883478";
-        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+        const whatsappNumber = "233274883478"; // Removed the '+' for better compatibility
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
 
-        window.open(whatsappUrl, '_blank');
+        // Using window.location.assign instead of window.open to bypass mobile popup blockers
+        // especially after an async call like handleCreateOrder
+        window.location.assign(whatsappUrl);
 
         // Clear cart and close panel
         if (onClearCart) onClearCart();
