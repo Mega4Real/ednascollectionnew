@@ -61,13 +61,18 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
             onClick={handleCardClick}
             data-id={product.id}
         >
-            <img
-                src={getOptimizedImageUrl(product.imageUrl || product.image)}
-                alt={`Dress ${product.id}`}
-                className="dress-image"
-                onClick={handleImageClick}
-                loading="lazy"
-            />
+            <div className="product-image-wrapper" style={{ position: 'relative' }}>
+                <img
+                    src={getOptimizedImageUrl(product.imageUrl || product.image)}
+                    alt={`Dress ${product.id}`}
+                    className="dress-image"
+                    onClick={handleImageClick}
+                    loading="lazy"
+                />
+                {product.isSold && (
+                    <div className="sold-badge">SOLD</div>
+                )}
+            </div>
             <div className="dress-info">
                 <div className="dress-price">₵{product.price.toFixed(2)}</div>
                 <div className="size-options">

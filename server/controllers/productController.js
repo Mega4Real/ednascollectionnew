@@ -50,7 +50,8 @@ exports.createProduct = async (req, res) => {
             videoUrl,
             price: parseFloat(price),
             sizes,
-            position: nextPosition
+            position: nextPosition,
+            isSold: req.body.isSold || false
         };
 
         const product = await prisma.product.create({
@@ -75,7 +76,8 @@ exports.updateProduct = async (req, res) => {
                 imageUrl,
                 videoUrl,
                 price: parseFloat(price),
-                sizes
+                sizes,
+                isSold: req.body.isSold
             }
         });
 
