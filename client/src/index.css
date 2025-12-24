@@ -1118,6 +1118,12 @@ header h1:hover {
 }
 
 @media (max-width: 480px) {
+
+    .hero-section {
+        min-height: 600px;
+        margin-top: -6rem;
+    }
+
     .hero-title {
         font-size: 2rem;
     }
