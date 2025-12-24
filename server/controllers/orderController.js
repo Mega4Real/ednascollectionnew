@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { sendOrderNotification } = require('../utils/emailService');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -57,6 +58,9 @@ exports.createOrder = async (req, res) => {
                 }
             });
         }
+
+        // Send Email Notification (Non-blocking)
+        sendOrderNotification(order).catch(err => console.error('Email notification background error:', err));
 
         res.status(201).json({
             success: true,
