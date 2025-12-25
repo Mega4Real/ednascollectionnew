@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PaystackButton } from 'react-paystack';
+import { usePaystackPayment } from 'react-paystack';
 
 const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -100,7 +100,31 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         }
     };
 
+    const initializePayment = usePaystackPayment(componentProps);
+
+    const validateForm = (isWhatsApp = false) => {
+        const requiredFields = isWhatsApp
+            ? ['name', 'phone', 'address', 'city']
+            : ['name', 'email', 'phone', 'address', 'city'];
+
+        const missingFields = requiredFields.filter(field => !formData[field]);
+
+        if (missingFields.length > 0) {
+            alert('Please fill in all required delivery details before proceeding.');
+            return false;
+        }
+        return true;
+    };
+
+    const handlePaystackClick = () => {
+        if (validateForm()) {
+            initializePayment(handlePaystackSuccessAction, handlePaystackCloseAction);
+        }
+    };
+
     const handleSendToWhatsApp = async () => {
+        if (!validateForm(true)) return;
+
         // Save order to backend first
         await handleCreateOrder({ paymentMethod: 'WHATSAPP' });
 
@@ -331,7 +355,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     <button
                                         className="whatsapp-button-new"
                                         onClick={handleSendToWhatsApp}
-                                        disabled={!formData.name || !formData.phone || !formData.address}
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -346,11 +369,12 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         COMPLETE ON WHATSAPP
                                     </button>
 
-                                    <PaystackButton
+                                    <button
                                         className="paystack-button-new"
-                                        {...componentProps}
-                                        disabled={!formData.name || !formData.phone || !formData.address || !formData.email}
-                                    />
+                                        onClick={handlePaystackClick}
+                                    >
+                                        PAY ONLINE (MOBILE MONEY / CARD)
+                                    </button>
 
                                     <button className="continue-shopping" onClick={() => setStep('cart')}>
                                         ← Back to Cart
