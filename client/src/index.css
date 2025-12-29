@@ -305,6 +305,8 @@ header h1:hover {
 .cart-popup-new {
     width: 450px;
     height: 100vh;
+    height: 100dvh;
+    /* dynamic viewport height to fix mobile cutoff */
     background: #fff;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
     display: flex;
