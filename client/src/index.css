@@ -294,7 +294,7 @@ header h1:hover {
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 110vh;
     background: rgba(0, 0, 0, 0.5);
     z-index: 2000;
     display: flex;
@@ -435,7 +435,7 @@ header h1:hover {
 }
 
 .cart-summary-new {
-    padding: 0 1.5rem calc(6rem + env(safe-area-inset-bottom)) 1.5rem;
+    padding: 0 1.5rem calc(8rem + env(safe-area-inset-bottom)) 1.5rem;
     border-top: 1px solid #f0f0f0;
     background: #fff;
 }
