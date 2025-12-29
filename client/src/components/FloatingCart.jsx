@@ -12,6 +12,14 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         address: '',
         city: ''
     });
+
+    // Refs for native validation
+    const nameRef = useRef(null);
+    const emailRef = useRef(null);
+    const phoneRef = useRef(null);
+    const addressRef = useRef(null);
+    const cityRef = useRef(null);
+
     const cartRef = useRef(null);
 
     const total = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -103,15 +111,26 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const initializePayment = usePaystackPayment(componentProps);
 
     const validateForm = (isWhatsApp = false) => {
-        const requiredFields = isWhatsApp
-            ? ['name', 'phone', 'address', 'city']
-            : ['name', 'email', 'phone', 'address', 'city'];
+        const fieldMap = [
+            { name: 'name', ref: nameRef },
+            { name: 'email', ref: emailRef, required: !isWhatsApp }, // Email optional for WhatsApp
+            { name: 'phone', ref: phoneRef },
+            { name: 'address', ref: addressRef },
+            { name: 'city', ref: cityRef }
+        ];
 
-        const missingFields = requiredFields.filter(field => !formData[field]);
+        for (const field of fieldMap) {
+            // Default required to true if not specified
+            const isRequired = field.required !== false;
 
-        if (missingFields.length > 0) {
-            alert('Please fill in all required delivery details before proceeding.');
-            return false;
+            if (isRequired && !formData[field.name]?.trim()) {
+                const element = field.ref.current;
+                if (element) {
+                    element.focus(); // Open keyboard and scroll to view
+                    element.reportValidity(); // Show native "Fill out this field" bubble
+                }
+                return false;
+            }
         }
         return true;
     };
@@ -195,8 +214,17 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         // Cleanup on unmount
         return () => {
             document.body.style.overflow = 'unset';
+            document.body.style.paddingRight = '0px';
         };
     }, [isOpen]);
+
+    // Automatically close cart and unlock scroll if it becomes empty
+    useEffect(() => {
+        if (selectedItems.length === 0 && isOpen) {
+            setIsOpen(false);
+            document.body.style.overflow = 'unset'; // Force unlock just in case
+        }
+    }, [selectedItems, isOpen]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -248,23 +276,33 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                         {step === 'cart' ? (
                             <>
                                 <div className="selected-items-new">
-                                    {selectedItems.map(item => (
-                                        <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
-                                            <div className="item-image-container">
-                                                <img src={item.imageUrl || item.image} alt={item.name} />
+                                    {selectedItems.map(item => {
+                                        const getOptimizedImageUrl = (url) => {
+                                            if (!url) return '';
+                                            if (url.includes('cloudinary.com')) {
+                                                return url.replace('/upload/', '/upload/w_500,q_auto,f_auto/');
+                                            }
+                                            return url;
+                                        };
+
+                                        return (
+                                            <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
+                                                <div className="item-image-container">
+                                                    <img src={getOptimizedImageUrl(item.imageUrl || item.image)} alt={item.name} />
+                                                </div>
+                                                <div className="item-info-new">
+                                                    <span className="item-size-label">Size: {item.selectedSize}</span>
+                                                    <span className="item-price-new">GH₵{item.price.toFixed(2)}</span>
+                                                </div>
+                                                <button
+                                                    className="remove-item-new"
+                                                    onClick={() => onRemoveItem(item.id)}
+                                                >
+                                                    ×
+                                                </button>
                                             </div>
-                                            <div className="item-info-new">
-                                                <span className="item-size-label">Size: {item.selectedSize}</span>
-                                                <span className="item-price-new">GH₵{item.price.toFixed(2)}</span>
-                                            </div>
-                                            <button
-                                                className="remove-item-new"
-                                                onClick={() => onRemoveItem(item.id)}
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
 
                                 <div className="cart-summary-new">
@@ -294,6 +332,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="text"
                                             name="name"
+                                            ref={nameRef}
                                             placeholder="Your Name"
                                             value={formData.name}
                                             onChange={handleInputChange}
@@ -305,6 +344,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="email"
                                             name="email"
+                                            ref={emailRef}
                                             placeholder="your@email.com"
                                             value={formData.email}
                                             onChange={handleInputChange}
@@ -316,6 +356,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="tel"
                                             name="phone"
+                                            ref={phoneRef}
                                             placeholder="024 XXX XXXX"
                                             value={formData.phone}
                                             onChange={handleInputChange}
@@ -327,6 +368,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="text"
                                             name="address"
+                                            ref={addressRef}
                                             placeholder="House No / Street / Landmark"
                                             value={formData.address}
                                             onChange={handleInputChange}
@@ -338,6 +380,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="text"
                                             name="city"
+                                            ref={cityRef}
                                             placeholder="Accra, Kumasi, etc."
                                             value={formData.city}
                                             onChange={handleInputChange}
