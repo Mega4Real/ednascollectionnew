@@ -304,7 +304,7 @@ header h1:hover {
 
 .cart-popup-new {
     width: 450px;
-    height: 100vh;
+    height: 100%;
     background: #fff;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -435,7 +435,7 @@ header h1:hover {
 }
 
 .cart-summary-new {
-    padding: 0 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) 1.5rem;
+    padding: 0 1.5rem calc(6rem + env(safe-area-inset-bottom)) 1.5rem;
     border-top: 1px solid #f0f0f0;
     background: #fff;
 }
