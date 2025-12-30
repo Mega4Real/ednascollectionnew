@@ -79,9 +79,12 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         setStep('cart');
     };
 
-    const handlePaystackCloseAction = () => {
-        // Implementation for what happens when the checkout form is closed
+    const handlePaystackCloseAction = async () => {
         console.log('Payment closed');
+        await handleCreateOrder({
+            paymentMethod: 'PAYSTACK',
+            status: 'CANCELLED'
+        });
     };
 
     const componentProps = {

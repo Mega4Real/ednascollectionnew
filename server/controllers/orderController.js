@@ -27,7 +27,9 @@ exports.createOrder = async (req, res) => {
                 totalAmount,
                 paymentMethod,
                 paymentReference,
-                status: paymentMethod === 'PAYSTACK' ? 'PAID' : 'PENDING',
+                paymentMethod,
+                paymentReference,
+                status: req.body.status || (paymentMethod === 'PAYSTACK' ? 'PAID' : 'PENDING'),
                 items: {
                     create: items.map(item => ({
                         productId: item.productId,
