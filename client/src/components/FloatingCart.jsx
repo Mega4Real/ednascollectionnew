@@ -59,6 +59,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             return await response.json();
         } catch (error) {
             console.error('Error saving order:', error);
+            alert(`Error saving order: ${error.message}. Please contact support if payment was deducted.`);
             // Even if backend fails, we might still want to proceed with WhatsApp or alert the user
         }
     };

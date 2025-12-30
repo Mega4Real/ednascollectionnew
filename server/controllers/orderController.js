@@ -32,9 +32,9 @@ exports.createOrder = async (req, res) => {
                 status: req.body.status || (paymentMethod === 'PAYSTACK' ? 'PAID' : 'PENDING'),
                 items: {
                     create: items.map(item => ({
-                        productId: item.productId,
+                        productId: parseInt(item.productId),
                         size: item.selectedSize || item.size,
-                        price: item.price
+                        price: parseFloat(item.price)
                     }))
                 }
             },
