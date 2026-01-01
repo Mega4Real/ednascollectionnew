@@ -305,8 +305,6 @@ header h1:hover {
 .cart-popup-new {
     width: 450px;
     height: 100vh;
-    height: 100dvh;
-    /* dynamic viewport height to fix mobile cutoff */
     background: #fff;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -437,7 +435,7 @@ header h1:hover {
 }
 
 .cart-summary-new {
-    padding: 0 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) 1.5rem;
+    padding: 0 1.5rem 5rem 1.5rem;
     border-top: 1px solid #f0f0f0;
     background: #fff;
 }
@@ -950,9 +948,7 @@ header h1:hover {
 .hero-section {
     position: relative;
     width: 100%;
-    min-height: 100vh;
-    min-height: 100svh;
-    /* Better support for mobile browser bars */
+    min-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -961,8 +957,8 @@ header h1:hover {
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: scroll;
-    padding-top: 8rem;
-    /* Account for the fixed header */
+    margin-top: -2.5rem;
+    /* Offset the app-container padding-top if needed or adjust app-container */
 }
 
 .hero-overlay {
@@ -1097,43 +1093,22 @@ header h1:hover {
 /* Responsive Hero Section */
 @media (max-width: 768px) {
     .hero-section {
-        min-height: 100svh;
-        padding-top: 6rem;
-        /* Slightly less padding on tablet */
+        min-height: 800px;
+        margin-top: -8rem;
     }
 
     .hero-content {
-        padding-top: 0;
-        /* Remove hardcoded offset, rely on flexbox */
-        width: 90%;
-        margin: 0 auto;
+        padding-top: 20rem;
+        /* Move content down */
     }
 
     .hero-title {
-        font-size: 3rem;
-        word-wrap: break-word;
-    }
-
-    .hero-motto {
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-section {
-        padding-top: 5rem;
-    }
-
-    .hero-title {
-        font-size: 2.2rem;
+        font-size: 2.5rem;
     }
 
     .hero-motto {
         font-size: 1.1rem;
         margin-bottom: 1.5rem;
-        white-space: normal;
-        line-height: 1.4;
     }
 
     .hero-button {
@@ -1142,18 +1117,18 @@ header h1:hover {
     }
 }
 
-/* Extra small devices (iPhone 7, SE, etc.) */
-@media (max-width: 360px) {
+@media (max-width: 480px) {
     .hero-title {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
 
     .hero-motto {
-        font-size: 0.95rem;
+        font-size: 1rem;
+        margin-bottom: 1.2rem;
     }
 
     .hero-button {
-        padding: 0.7rem 1.8rem;
+        padding: 0.7rem 1.5rem;
         font-size: 0.9rem;
     }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { usePaystackPayment } from 'react-paystack';
+import { PaystackButton } from 'react-paystack';
 
 const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -12,14 +12,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         address: '',
         city: ''
     });
-
-    // Refs for native validation
-    const nameRef = useRef(null);
-    const emailRef = useRef(null);
-    const phoneRef = useRef(null);
-    const addressRef = useRef(null);
-    const cityRef = useRef(null);
-
     const cartRef = useRef(null);
 
     const total = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -59,7 +51,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             return await response.json();
         } catch (error) {
             console.error('Error saving order:', error);
-            alert(`Error saving order: ${error.message}. Please contact support if payment was deducted.`);
             // Even if backend fails, we might still want to proceed with WhatsApp or alert the user
         }
     };
@@ -80,12 +71,9 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         setStep('cart');
     };
 
-    const handlePaystackCloseAction = async () => {
+    const handlePaystackCloseAction = () => {
+        // Implementation for what happens when the checkout form is closed
         console.log('Payment closed');
-        await handleCreateOrder({
-            paymentMethod: 'PAYSTACK',
-            status: 'CANCELLED'
-        });
     };
 
     const componentProps = {
@@ -112,42 +100,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         }
     };
 
-    const initializePayment = usePaystackPayment(componentProps);
-
-    const validateForm = (isWhatsApp = false) => {
-        const fieldMap = [
-            { name: 'name', ref: nameRef },
-            { name: 'email', ref: emailRef, required: !isWhatsApp }, // Email optional for WhatsApp
-            { name: 'phone', ref: phoneRef },
-            { name: 'address', ref: addressRef },
-            { name: 'city', ref: cityRef }
-        ];
-
-        for (const field of fieldMap) {
-            // Default required to true if not specified
-            const isRequired = field.required !== false;
-
-            if (isRequired && !formData[field.name]?.trim()) {
-                const element = field.ref.current;
-                if (element) {
-                    element.focus(); // Open keyboard and scroll to view
-                    element.reportValidity(); // Show native "Fill out this field" bubble
-                }
-                return false;
-            }
-        }
-        return true;
-    };
-
-    const handlePaystackClick = () => {
-        if (validateForm()) {
-            initializePayment(handlePaystackSuccessAction, handlePaystackCloseAction);
-        }
-    };
-
     const handleSendToWhatsApp = async () => {
-        if (!validateForm(true)) return;
-
         // Save order to backend first
         await handleCreateOrder({ paymentMethod: 'WHATSAPP' });
 
@@ -172,18 +125,10 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         message += `Total: ₵${total.toFixed(2)}`;
 
         const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = "233274883478";
+        const whatsappNumber = "+233274883478";
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 
-        // Detect if the user is on a mobile device
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-        // Use the direct app protocol for mobile, fallback to web API for desktop
-        const whatsappUrl = isMobile
-            ? `whatsapp://send?phone=${whatsappNumber}&text=${encodedMessage}`
-            : `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
-
-        // Using window.location.assign instead of window.open to bypass mobile popup blockers
-        window.location.assign(whatsappUrl);
+        window.open(whatsappUrl, '_blank');
 
         // Clear cart and close panel
         if (onClearCart) onClearCart();
@@ -218,17 +163,8 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         // Cleanup on unmount
         return () => {
             document.body.style.overflow = 'unset';
-            document.body.style.paddingRight = '0px';
         };
     }, [isOpen]);
-
-    // Automatically close cart and unlock scroll if it becomes empty
-    useEffect(() => {
-        if (selectedItems.length === 0 && isOpen) {
-            setIsOpen(false);
-            document.body.style.overflow = 'unset'; // Force unlock just in case
-        }
-    }, [selectedItems, isOpen]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -280,33 +216,23 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                         {step === 'cart' ? (
                             <>
                                 <div className="selected-items-new">
-                                    {selectedItems.map(item => {
-                                        const getOptimizedImageUrl = (url) => {
-                                            if (!url) return '';
-                                            if (url.includes('cloudinary.com')) {
-                                                return url.replace('/upload/', '/upload/w_500,q_auto,f_auto/');
-                                            }
-                                            return url;
-                                        };
-
-                                        return (
-                                            <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
-                                                <div className="item-image-container">
-                                                    <img src={getOptimizedImageUrl(item.imageUrl || item.image)} alt={item.name} />
-                                                </div>
-                                                <div className="item-info-new">
-                                                    <span className="item-size-label">Size: {item.selectedSize}</span>
-                                                    <span className="item-price-new">GH₵{item.price.toFixed(2)}</span>
-                                                </div>
-                                                <button
-                                                    className="remove-item-new"
-                                                    onClick={() => onRemoveItem(item.id)}
-                                                >
-                                                    ×
-                                                </button>
+                                    {selectedItems.map(item => (
+                                        <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
+                                            <div className="item-image-container">
+                                                <img src={item.imageUrl || item.image} alt={item.name} />
                                             </div>
-                                        );
-                                    })}
+                                            <div className="item-info-new">
+                                                <span className="item-size-label">Size: {item.selectedSize}</span>
+                                                <span className="item-price-new">GH₵{item.price.toFixed(2)}</span>
+                                            </div>
+                                            <button
+                                                className="remove-item-new"
+                                                onClick={() => onRemoveItem(item.id)}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="cart-summary-new">
@@ -336,7 +262,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="text"
                                             name="name"
-                                            ref={nameRef}
                                             placeholder="Your Name"
                                             value={formData.name}
                                             onChange={handleInputChange}
@@ -348,7 +273,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="email"
                                             name="email"
-                                            ref={emailRef}
                                             placeholder="your@email.com"
                                             value={formData.email}
                                             onChange={handleInputChange}
@@ -360,7 +284,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="tel"
                                             name="phone"
-                                            ref={phoneRef}
                                             placeholder="024 XXX XXXX"
                                             value={formData.phone}
                                             onChange={handleInputChange}
@@ -372,7 +295,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="text"
                                             name="address"
-                                            ref={addressRef}
                                             placeholder="House No / Street / Landmark"
                                             value={formData.address}
                                             onChange={handleInputChange}
@@ -384,7 +306,6 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <input
                                             type="text"
                                             name="city"
-                                            ref={cityRef}
                                             placeholder="Accra, Kumasi, etc."
                                             value={formData.city}
                                             onChange={handleInputChange}
@@ -402,6 +323,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     <button
                                         className="whatsapp-button-new"
                                         onClick={handleSendToWhatsApp}
+                                        disabled={!formData.name || !formData.phone || !formData.address}
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -416,12 +338,11 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         COMPLETE ON WHATSAPP
                                     </button>
 
-                                    <button
+                                    <PaystackButton
                                         className="paystack-button-new"
-                                        onClick={handlePaystackClick}
-                                    >
-                                        PAY ONLINE (MOBILE MONEY / CARD)
-                                    </button>
+                                        {...componentProps}
+                                        disabled={!formData.name || !formData.phone || !formData.address || !formData.email}
+                                    />
 
                                     <button className="continue-shopping" onClick={() => setStep('cart')}>
                                         ← Back to Cart

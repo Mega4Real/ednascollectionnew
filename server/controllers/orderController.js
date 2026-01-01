@@ -1,6 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { sendOrderNotification } = require('../utils/emailService');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -27,14 +26,12 @@ exports.createOrder = async (req, res) => {
                 totalAmount,
                 paymentMethod,
                 paymentReference,
-                paymentMethod,
-                paymentReference,
-                status: req.body.status || (paymentMethod === 'PAYSTACK' ? 'PAID' : 'PENDING'),
+                status: paymentMethod === 'PAYSTACK' ? 'PAID' : 'PENDING',
                 items: {
                     create: items.map(item => ({
-                        productId: parseInt(item.productId),
+                        productId: item.productId,
                         size: item.selectedSize || item.size,
-                        price: parseFloat(item.price)
+                        price: item.price
                     }))
                 }
             },
@@ -60,9 +57,6 @@ exports.createOrder = async (req, res) => {
                 }
             });
         }
-
-        // Send Email Notification (Non-blocking)
-        sendOrderNotification(order).catch(err => console.error('Email notification background error:', err));
 
         res.status(201).json({
             success: true,
