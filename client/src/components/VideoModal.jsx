@@ -71,7 +71,17 @@ const VideoModal = ({ product, onClose }) => {
         }
     };
 
-    const videoSrc = product.videoUrl || `videos/dress${product.id}.mp4`;
+    // Helper to optimize the Cloudinary URL
+    const getOptimizedVideoUrl = (url) => {
+        if (!url || !url.includes('cloudinary.com')) return url;
+        
+        // This inserts 'q_auto,f_auto' into the URL path
+        // From: .../upload/v12345/video.mp4
+        // To:   .../upload/q_auto,f_auto/v12345/video.mp4
+        return url.replace('/upload/', '/upload/q_auto,f_auto/');
+    };
+
+    const videoSrc = getOptimizedVideoUrl(product.videoUrl || `videos/dress${product.id}.mp4`);
 
     return (
         <div className="modal" style={{ display: 'block' }} onClick={handleBackdropClick}>
