@@ -153,7 +153,15 @@ const Home = () => {
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to top of product grid, accounting for fixed header
+        const dressContainer = document.querySelector('.dress-container');
+        if (dressContainer) {
+            const headerHeight = window.innerWidth <= 768 ? 40 : 128; // Approximate header heights
+            const offsetTop = dressContainer.offsetTop - headerHeight;
+            window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'smooth' });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     };
 
     // Generate page numbers

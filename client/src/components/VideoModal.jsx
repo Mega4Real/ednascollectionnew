@@ -74,11 +74,13 @@ const VideoModal = ({ product, onClose }) => {
     // Helper to optimize the Cloudinary URL
     const getOptimizedVideoUrl = (url) => {
         if (!url || !url.includes('cloudinary.com')) return url;
-        
-        // This inserts 'q_auto,f_auto' into the URL path
-        // From: .../upload/v12345/video.mp4
-        // To:   .../upload/q_auto,f_auto/v12345/video.mp4
-        return url.replace('/upload/', '/upload/q_auto,f_auto/');
+
+        // Optimized for faster loading while maintaining compatibility:
+        // q_auto: automatic quality adjustment
+        // f_mp4: force MP4 format for better browser support
+        // w_720: limit width to 720p for faster loading
+        // c_limit: crop to fit dimensions if needed
+        return url.replace('/upload/', '/upload/q_auto,f_mp4,w_720,c_limit/');
     };
 
     const videoSrc = getOptimizedVideoUrl(product.videoUrl || `videos/dress${product.id}.mp4`);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { usePaystackPayment } from 'react-paystack';
 
 const ReceiptTemplate = ({ orderId, items, total, customer, paymentMethod }) => (
@@ -156,6 +156,35 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     });
     const [successOrder, setSuccessOrder] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [loadedImages, setLoadedImages] = useState(new Set());
+    const [imageLoadingStates, setImageLoadingStates] = useState(new Map());
+
+    // Preload images when items are added to cart
+    const preloadImage = useCallback((src) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                setLoadedImages(prev => new Set([...prev, src]));
+                resolve(src);
+            };
+            img.onerror = reject;
+            img.src = src;
+        });
+    }, []);
+
+    // Preload all cart item images
+    useEffect(() => {
+        const imageUrls = selectedItems.map(item => item.imageUrl || item.image).filter(Boolean);
+        const uniqueUrls = [...new Set(imageUrls)];
+
+        uniqueUrls.forEach(url => {
+            if (!loadedImages.has(url)) {
+                preloadImage(url).catch(err => {
+                    console.warn('Failed to preload image:', url, err);
+                });
+            }
+        });
+    }, [selectedItems, loadedImages, preloadImage]);
 
     const formRef = useRef(null);
     const cartPopupRef = useRef(null);
@@ -575,8 +604,22 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                 <div className="selected-items-new">
                                     {selectedItems.map(item => (
                                         <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
-                                            <div className="item-image-container">
-                                                <img src={item.imageUrl || item.image} alt={item.name} />
+                                            <div className={`item-image-container ${!loadedImages.has(item.imageUrl || item.image) ? 'loading' : ''}`}>
+                                                {!loadedImages.has(item.imageUrl || item.image) && (
+                                                    <div className="image-loading-spinner"></div>
+                                                )}
+                                                <img
+                                                    src={item.imageUrl || item.image}
+                                                    alt={item.name}
+                                                    className={loadedImages.has(item.imageUrl || item.image) ? 'loaded' : ''}
+                                                    onLoad={() => {
+                                                        setLoadedImages(prev => new Set([...prev, item.imageUrl || item.image]));
+                                                    }}
+                                                    onError={() => {
+                                                        // Handle error by showing a placeholder or fallback
+                                                        setLoadedImages(prev => new Set([...prev, item.imageUrl || item.image]));
+                                                    }}
+                                                />
                                             </div>
                                             <div className="item-info-new">
                                                 <span className="item-size-label">Size: {item.selectedSize}</span>
