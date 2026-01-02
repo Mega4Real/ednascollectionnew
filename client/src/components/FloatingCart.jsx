@@ -4,55 +4,109 @@ import { usePaystackPayment } from 'react-paystack';
 const ReceiptTemplate = ({ orderId, items, total, customer, paymentMethod }) => (
     <div id="printable-receipt" style={{
         display: 'none',
-        padding: '30px',
+        padding: window.innerWidth <= 480 ? '20px' : window.innerWidth <= 768 ? '25px' : '30px',
         fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
         color: '#333',
-        maxWidth: '500px',
-        margin: '0 auto'
+        maxWidth: window.innerWidth <= 480 ? '100%' : window.innerWidth <= 768 ? '400px' : '500px',
+        margin: '0 auto',
+        width: window.innerWidth <= 480 ? '100%' : 'auto',
+        boxSizing: 'border-box'
     }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <h2 style={{ margin: '0', letterSpacing: '2px' }}>ERDNA COLLECTIONS</h2>
-            <p style={{ fontSize: '12px', color: '#666' }}>Order Receipt #{orderId}</p>
-            <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#666' }}>
+        <div style={{ textAlign: 'center', marginBottom: window.innerWidth <= 480 ? '15px' : '20px' }}>
+            <h2 style={{
+                margin: '0',
+                letterSpacing: '2px',
+                fontFamily: "'Amsterdam One', 'Brush Script MT', cursive",
+                color: '#ff69b4',
+                fontSize: window.innerWidth <= 480 ? '1.5rem' : window.innerWidth <= 768 ? '1.8rem' : '2rem',
+                fontWeight: 'normal'
+            }}>Erdnas Collections</h2>
+            <p style={{
+                fontSize: window.innerWidth <= 480 ? '11px' : '12px',
+                color: '#666',
+                marginTop: '5px'
+            }}>Order Receipt #{orderId}</p>
+            <p style={{
+                margin: '5px 0 0 0',
+                fontSize: window.innerWidth <= 480 ? '11px' : '12px',
+                color: '#666'
+            }}>
                 <strong>Payment:</strong> {paymentMethod === 'WHATSAPP' ? 'WhatsApp / Manual' : 'Online (Paystack)'}
             </p>
         </div>
 
         {customer && (
-            <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '4px', fontSize: '14px' }}>
+            <div style={{
+                marginBottom: window.innerWidth <= 480 ? '15px' : '20px',
+                padding: window.innerWidth <= 480 ? '8px' : '10px',
+                backgroundColor: '#f9f9f9',
+                borderRadius: '4px',
+                fontSize: window.innerWidth <= 480 ? '13px' : '14px'
+            }}>
                 <p style={{ margin: '0 0 5px 0' }}><strong>Customer:</strong> {customer.name}</p>
                 <p style={{ margin: '0 0 5px 0' }}><strong>Phone:</strong> {customer.phone}</p>
                 <p style={{ margin: '0' }}><strong>Address:</strong> {customer.address}, {customer.city}</p>
             </div>
         )}
 
-        <div style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
-            <h4 style={{ margin: '0 0 15px 0', fontSize: '16px' }}>Items</h4>
+        <div style={{
+            borderTop: '1px solid #eee',
+            paddingTop: window.innerWidth <= 480 ? '12px' : '15px'
+        }}>
+            <h4 style={{
+                margin: '0 0 15px 0',
+                fontSize: window.innerWidth <= 480 ? '14px' : '16px'
+            }}>Items</h4>
 
             {items.map((item, index) => (
                 <div key={index} style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '10px 0',
-                    borderBottom: '1px solid #f9f9f9'
+                    padding: window.innerWidth <= 480 ? '8px 0' : '10px 0',
+                    borderBottom: '1px solid #f9f9f9',
+                    flexWrap: window.innerWidth <= 480 ? 'wrap' : 'nowrap',
+                    gap: window.innerWidth <= 480 ? '10px' : '15px'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: window.innerWidth <= 480 ? '10px' : '15px',
+                        flex: window.innerWidth <= 480 ? '1 1 100%' : 'auto'
+                    }}>
                         <img
                             src={item.imageUrl || item.image}
                             alt={item.name}
-                            style={{ width: '50px', height: '60px', borderRadius: '4px', objectFit: 'cover' }}
+                            style={{
+                                width: window.innerWidth <= 480 ? '40px' : '50px',
+                                height: window.innerWidth <= 480 ? '48px' : '60px',
+                                borderRadius: '4px',
+                                objectFit: 'cover'
+                            }}
                         />
-                        <div>
-                            <p style={{ margin: '0', fontWeight: 'bold', fontSize: '14px' }}>
+                        <div style={{ flex: 1 }}>
+                            <p style={{
+                                margin: '0',
+                                fontWeight: 'bold',
+                                fontSize: window.innerWidth <= 480 ? '12px' : '14px'
+                            }}>
                                 Product ID: {item.id}
                             </p>
-                            <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                            <p style={{
+                                margin: '0',
+                                fontSize: window.innerWidth <= 480 ? '11px' : '12px',
+                                color: '#666'
+                            }}>
                                 Size: {item.selectedSize}
                             </p>
                         </div>
                     </div>
-                    <p style={{ margin: '0', fontWeight: 'bold' }}>
+                    <p style={{
+                        margin: '0',
+                        fontWeight: 'bold',
+                        fontSize: window.innerWidth <= 480 ? '13px' : '14px',
+                        flexShrink: 0
+                    }}>
                         ₵{item.price.toFixed(2)}
                     </p>
                 </div>
@@ -60,20 +114,26 @@ const ReceiptTemplate = ({ orderId, items, total, customer, paymentMethod }) => 
         </div>
 
         <div style={{
-            marginTop: '20px',
-            paddingTop: '15px',
+            marginTop: window.innerWidth <= 480 ? '15px' : '20px',
+            paddingTop: window.innerWidth <= 480 ? '12px' : '15px',
             borderTop: '2px solid #333',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
         }}>
-            <h3 style={{ margin: '0' }}>Total</h3>
-            <h3 style={{ margin: '0' }}>₵{total.toFixed(2)}</h3>
+            <h3 style={{
+                margin: '0',
+                fontSize: window.innerWidth <= 480 ? '16px' : '18px'
+            }}>Total</h3>
+            <h3 style={{
+                margin: '0',
+                fontSize: window.innerWidth <= 480 ? '16px' : '18px'
+            }}>₵{total.toFixed(2)}</h3>
         </div>
 
         <p style={{
-            fontSize: '10px',
-            marginTop: '40px',
+            fontSize: window.innerWidth <= 480 ? '9px' : '10px',
+            marginTop: window.innerWidth <= 480 ? '30px' : '40px',
             textAlign: 'center',
             color: '#999',
             textTransform: 'uppercase'
@@ -310,7 +370,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             });
 
             const baseUrl = window.location.origin;
-            let message = `*NEW ORDER - ERDNA COLLECTIONS*\n\n`;
+            let message = `*NEW ORDER - ERDNAS COLLECTIONS*\n\n`;
             message += `*Order Ref: ${customReference}*\n`;
             message += `*Customer Details:*\n`;
             message += `Name: ${formData.name}\n`;

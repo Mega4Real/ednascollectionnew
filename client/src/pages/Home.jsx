@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
@@ -174,11 +174,59 @@ const Home = () => {
     };
 
     const [showHero, setShowHero] = useState(true);
+    const heroRef = useRef(null);
 
     const handleEnterShop = () => {
         setShowHero(false);
         window.scrollTo({ top: 0, behavior: 'auto' });
     };
+
+    // Hide header and filters when hero section is visible, show them when on product section
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                // Hide header and filters when hero is at least 50% visible
+                const headerElement = document.querySelector('header');
+                const filtersElement = document.querySelector('.filters');
+
+                if (entry.isIntersecting) {
+                    if (headerElement) headerElement.classList.add('hidden');
+                    if (filtersElement) filtersElement.classList.add('hidden');
+                } else {
+                    if (headerElement) headerElement.classList.remove('hidden');
+                    if (filtersElement) filtersElement.classList.remove('hidden');
+                }
+            },
+            {
+                threshold: 0.5, // Trigger when 50% of hero is visible
+                rootMargin: '-80px 0px 0px 0px' // Account for fixed header
+            }
+        );
+
+        if (heroRef.current) {
+            observer.observe(heroRef.current);
+        }
+
+        // Handle header visibility based on showHero state
+        const headerElement = document.querySelector('header');
+        const filtersElement = document.querySelector('.filters');
+
+        if (showHero) {
+            // When hero is shown, hide header initially (intersection observer will handle visibility)
+            if (headerElement) headerElement.classList.add('hidden');
+            if (filtersElement) filtersElement.classList.add('hidden');
+        } else {
+            // When hero is not shown (on product section), always show header
+            if (headerElement) headerElement.classList.remove('hidden');
+            if (filtersElement) filtersElement.classList.remove('hidden');
+        }
+
+        return () => {
+            if (heroRef.current) {
+                observer.unobserve(heroRef.current);
+            }
+        };
+    }, [showHero]);
 
     // Hide hero if scrolled past a certain point
     useEffect(() => {
@@ -199,11 +247,14 @@ const Home = () => {
                 filters={filters}
                 setFilters={setFilters}
                 clearFilters={clearFilters}
-                onLogoClick={() => setShowHero(true)}
+                onLogoClick={() => {
+                    setShowHero(true);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
             />
 
             <main>
-                {showHero && <Hero onEnterShop={handleEnterShop} />}
+                {showHero && <Hero ref={heroRef} onEnterShop={handleEnterShop} />}
                 <div className="dress-container">
                     {loading ? (
                         <div style={{

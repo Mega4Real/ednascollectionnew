@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
+import landingBg from '/landing-bg.webp';
+import landingMobile from '/landing-mobile.webp';
 
-const Hero = ({ onEnterShop }) => {
+const Hero = forwardRef(({ onEnterShop }, ref) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     useEffect(() => {
@@ -25,6 +27,7 @@ const Hero = ({ onEnterShop }) => {
 
     return (
         <section
+            ref={ref}
             className="hero-section"
             style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.webp' : '/landing-bg.webp'})` }}
         >
@@ -39,6 +42,6 @@ const Hero = ({ onEnterShop }) => {
             </div>
         </section>
     );
-};
+});
 
 export default Hero;
