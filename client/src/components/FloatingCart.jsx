@@ -333,7 +333,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             const encodedMessage = encodeURIComponent(message);
             const whatsappNumber = "+233274883478";
             const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-
+            const deepLinkUrl = `whatsapp://send?phone=${whatsappNumber}&text=${encodedMessage}`;
             // Show success screen with receipt option
             if (orderRes && orderRes.order) {
                 setSuccessOrder({
@@ -349,7 +349,16 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             if (onClearCart) onClearCart();
 
             // Redirect to WhatsApp - Try opening in a new tab first
-            const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            // 2. Detect device
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // 3. For Mobile: Use the direct protocol to skip the browser 'Open app' page
+                window.location.href = deepLinkUrl;
+            } else {
+                // 4. For Desktop: Use standard URL in a new tab
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            }
 
             // If the browser blocked the popup (returns null), fallback to current tab
             if (!newWindow) {
