@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { usePaystackPayment } from 'react-paystack';
 
-const ReceiptTemplate = ({ orderId, items, total, customer }) => (
+const ReceiptTemplate = ({ orderId, items, total, customer, paymentMethod }) => (
     <div id="printable-receipt" style={{
         display: 'none',
         padding: '30px',
@@ -13,6 +13,9 @@ const ReceiptTemplate = ({ orderId, items, total, customer }) => (
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <h2 style={{ margin: '0', letterSpacing: '2px' }}>ERDNA COLLECTIONS</h2>
             <p style={{ fontSize: '12px', color: '#666' }}>Order Receipt #{orderId}</p>
+            <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#666' }}>
+                <strong>Payment:</strong> {paymentMethod === 'WHATSAPP' ? 'WhatsApp / Manual' : 'Online (Paystack)'}
+            </p>
         </div>
 
         {customer && (
@@ -292,57 +295,80 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
     const handleSendToWhatsApp = async (e) => {
         if (e) e.preventDefault();
+        if (isProcessing) return;
+
         if (formRef.current && !formRef.current.reportValidity()) {
             return;
         }
 
-        const customReference = generateReference();
-        const orderRes = await handleCreateOrder({
-            paymentMethod: 'WHATSAPP',
-            paymentReference: customReference
-        });
-
-        const baseUrl = window.location.origin;
-        let message = `*NEW ORDER - ERDNA COLLECTIONS*\n\n`;
-        message += `*Order Ref: ${customReference}*\n`;
-        message += `*Customer Details:*\n`;
-        message += `Name: ${formData.name}\n`;
-        message += `Phone: ${formData.phone}\n`;
-        message += `Address: ${formData.address}, ${formData.city}\n\n`;
-        message += `*Items:*\n`;
-
-        selectedItems.forEach(item => {
-            const imageUrl = item.imageUrl || item.image;
-            const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${baseUrl}/${imageUrl}`;
-
-            message += ` View: ${fullImageUrl}\n`;
-            message += ` Size: ${item.selectedSize}\n`;
-            message += `💰 Price: ₵${item.price.toFixed(2)}\n`;
-            message += `-------------------------\n\n`;
-        });
-
-        message += `Total: ₵${total.toFixed(2)}`;
-
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappNumber = "+233274883478";
-        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-
-        window.open(whatsappUrl, '_blank');
-
-        // Show success screen with receipt option
-        if (orderRes && orderRes.order) {
-            setSuccessOrder({
-                id: customReference,
-                items: [...selectedItems],
-                total: total,
-                customer: { ...formData },
-                paymentMethod: 'WHATSAPP'
+        setIsProcessing(true);
+        try {
+            const customReference = generateReference();
+            const orderRes = await handleCreateOrder({
+                paymentMethod: 'WHATSAPP',
+                paymentReference: customReference
             });
-        }
 
-        // Clear cart
-        if (onClearCart) onClearCart();
+            const baseUrl = window.location.origin;
+            let message = `*NEW ORDER - ERDNA COLLECTIONS*\n\n`;
+            message += `*Order Ref: ${customReference}*\n`;
+            message += `*Customer Details:*\n`;
+            message += `Name: ${formData.name}\n`;
+            message += `Phone: ${formData.phone}\n`;
+            message += `Address: ${formData.address}, ${formData.city}\n\n`;
+            message += `*Items:*\n`;
+
+            selectedItems.forEach(item => {
+                const imageUrl = item.imageUrl || item.image;
+                const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${baseUrl}/${imageUrl}`;
+
+                message += ` View: ${fullImageUrl}\n`;
+                message += ` Size: ${item.selectedSize}\n`;
+                message += `💰 Price: ₵${item.price.toFixed(2)}\n`;
+                message += `-------------------------\n\n`;
+            });
+
+            message += `Total: ₵${total.toFixed(2)}`;
+
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappNumber = "+233274883478";
+            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+            // Show success screen with receipt option
+            if (orderRes && orderRes.order) {
+                setSuccessOrder({
+                    id: customReference,
+                    items: [...selectedItems],
+                    total: total,
+                    customer: { ...formData },
+                    paymentMethod: 'WHATSAPP'
+                });
+            }
+
+            // Clear cart
+            if (onClearCart) onClearCart();
+
+            // Redirect to WhatsApp - Try opening in a new tab first
+            const newWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+            // If the browser blocked the popup (returns null), fallback to current tab
+            if (!newWindow) {
+                setTimeout(() => {
+                    window.location.href = whatsappUrl;
+                }, 100);
+            }
+        } catch (error) {
+            console.error("WhatsApp redirection failed:", error);
+        } finally {
+            setIsProcessing(false);
+        }
     };
+
+    useEffect(() => {
+        if (successOrder) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [successOrder]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -623,6 +649,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                     items={successOrder.items || []}
                     total={successOrder.total || 0}
                     customer={successOrder.customer}
+                    paymentMethod={successOrder.paymentMethod}
                 />
             )}
         </div>
