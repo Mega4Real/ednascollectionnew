@@ -1491,7 +1491,7 @@ header h1:hover {
 }
 
 .hero-button:active {
-    transform: translateY(-1px);
+    /* No transform to prevent button movement on click */
 }
 
 @keyframes fadeInUp {
