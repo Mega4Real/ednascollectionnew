@@ -300,20 +300,6 @@ header h1:hover {
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
-    visibility: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.cart-popup-overlay.active {
-    visibility: visible;
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.floating-cart-wrapper.cart-open .floating-cart-new {
-    display: none;
 }
 
 .cart-popup-new {
