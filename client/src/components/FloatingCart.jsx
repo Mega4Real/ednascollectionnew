@@ -13,8 +13,10 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         city: ''
     });
     const [successOrder, setSuccessOrder] = useState(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const formRef = useRef(null);
+    const cartPopupRef = useRef(null);
     const pendingOrderId = useRef(null);
 
     const total = selectedItems.reduce((sum, item) => sum + item.price, 0);
@@ -74,20 +76,17 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     };
 
     const handlePaystackSuccessAction = (reference) => {
-        console.log("SUCCESS HANDLER HIT", reference); // Check for this!
-
         const orderId = pendingOrderId.current;
 
-        // Force the UI update
+        // 1. Update UI state FIRST
         setSuccessOrder({ id: orderId || reference.reference });
 
-        // Ensure this function exists before calling
+        // 2. Then clear the items
         if (typeof onClearCart === 'function') {
             onClearCart();
-        } else {
-            console.warn("onClearCart is not a function!");
         }
 
+        // 3. Then do background tasks
         if (orderId) {
             updateOrderStatusOnServer(orderId, 'PAID', reference.reference);
         }
@@ -132,47 +131,30 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
     const handlePaystackButtonClick = async (e) => {
         if (e) e.preventDefault();
+        if (isProcessing) return;
 
         if (formRef.current && formRef.current.reportValidity()) {
+            setIsProcessing(true);
             try {
+                // 1. Create the order on your backend
                 const orderRes = await handleCreateOrder({ paymentMethod: 'PAYSTACK' });
 
                 if (orderRes && orderRes.order) {
-                    // We use the ID returned from your FIXED backend
-                    const currentId = orderRes.order.id;
-                    pendingOrderId.current = currentId;
+                    // 2. Store the ID in the ref so the success handler can find it
+                    pendingOrderId.current = orderRes.order.id;
 
-                    // TRIGGER PAYSTACK WITH DIRECT CALLBACKS
-                    initializePayment(
-                        // SUCCESS CALLBACK
-                        (reference) => {
-                            console.log("Paystack Success:", reference);
-
-                            // 1. Show Success UI
-                            setSuccessOrder({ id: currentId });
-
-                            // 2. Clear the cart
-                            if (onClearCart) onClearCart();
-
-                            // 3. Update server background
-                            updateOrderStatusOnServer(currentId, 'PAID', reference.reference);
-
-                            // Clear product cache so SOLD badge appears immediately
-                            localStorage.removeItem('cachedProducts');
-                        },
-                        // CLOSE CALLBACK
-                        () => {
-                            console.log("Paystack Modal Closed");
-                            handlePaystackCloseAction();
-                        }
-                    );
+                    // 3. Trigger the Paystack popup
+                    // FIX: Pass componentProps directly into initializePayment
+                    // This prevents the 'reading config' undefined error
+                    console.log("Paystack Config Check:", componentProps);
+                    initializePayment(componentProps);
                 } else {
-                    console.error("PAYSTACK: No order object in response");
-                    alert("Failed to initiate order. Please try again.");
+                    alert("Order creation failed on server.");
                 }
             } catch (error) {
                 console.error("Payment initiation failed:", error);
-                alert("An error occurred. Please try again.");
+            } finally {
+                setIsProcessing(false);
             }
         }
     };
@@ -212,15 +194,14 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
         window.open(whatsappUrl, '_blank');
 
-        // Clear cart and close panel
+        // Clear cart and reset state
         if (onClearCart) onClearCart();
-        setIsOpen(false);
         setStep('cart');
     };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (formRef.current && !formRef.current.contains(event.target) && isOpen) {
+            if (cartPopupRef.current && !cartPopupRef.current.contains(event.target) && isOpen) {
                 setIsOpen(false);
             }
         };
@@ -266,7 +247,10 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         };
     }, []);
 
-    if (selectedItems.length === 0 && !successOrder) return null;
+    // ONLY return null if the cart is COMPLETELY empty AND not open AND not showing success
+    if (selectedItems.length === 0 && !successOrder && !isOpen) {
+        return null;
+    }
 
     return (
         <div className="floating-cart-wrapper">
@@ -290,7 +274,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
             {isOpen && (
                 <div className="cart-popup-overlay" onClick={() => setIsOpen(false)}>
-                    <div className="cart-popup-new" onClick={(e) => e.stopPropagation()}>
+                    <div className="cart-popup-new" ref={cartPopupRef} onClick={(e) => e.stopPropagation()}>
                         <div className="cart-header-new">
                             <h3>{successOrder ? 'Order Confirmed' : (step === 'cart' ? 'Your Cart' : 'Checkout')}</h3>
                             <button className="close-cart-new" onClick={() => {
@@ -448,8 +432,9 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     <button
                                         className="paystack-button-new"
                                         onClick={handlePaystackButtonClick}
+                                        disabled={isProcessing}
                                     >
-                                        PAY ONLINE (MOBILE MONEY / CARD)
+                                        {isProcessing ? 'PROCESSING...' : 'PAY ONLINE (MOBILE MONEY / CARD)'}
                                     </button>
 
                                     <button className="continue-shopping" onClick={() => setStep('cart')}>
