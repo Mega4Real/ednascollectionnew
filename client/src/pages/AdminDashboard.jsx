@@ -380,10 +380,11 @@ const AdminDashboard = () => {
                                         </td>
                                         <td style={{ padding: '1rem' }}>
                                             <strong>{order.customerName}</strong><br />
+                                            <span style={{ fontSize: '0.8rem', color: '#ff69b4', fontWeight: 'bold' }}>{order.paymentReference || 'N/A'}</span><br />
                                             <span style={{ fontSize: '0.8rem', color: '#666' }}>{order.address}, {order.city}</span>
                                         </td>
                                         <td style={{ padding: '1rem' }}>
-                                            {order.phone}<br />
+                                            <a href={`tel:${order.phone}`} style={{ textDecoration: 'none', color: 'inherit', fontWeight: '500' }}>{order.phone}</a><br />
                                             <span style={{ fontSize: '0.8rem', color: '#666' }}>{order.email}</span>
                                         </td>
                                         <td style={{ padding: '1rem' }}>₵{order.totalAmount.toFixed(2)}</td>
@@ -440,13 +441,16 @@ const AdminDashboard = () => {
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
                     <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                            <h2>Order Details #{selectedOrder.id}</h2>
+                            <div>
+                                <h2 style={{ margin: 0 }}>Order Details</h2>
+                                <p style={{ margin: 0, color: '#ff69b4', fontWeight: 'bold' }}>Reference: {selectedOrder.paymentReference || selectedOrder.id}</p>
+                            </div>
                             <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
                             <h4>Customer Info</h4>
                             <p><strong>Name:</strong> {selectedOrder.customerName}</p>
-                            <p><strong>Phone:</strong> {selectedOrder.phone}</p>
+                            <p><strong>Phone:</strong> <a href={`tel:${selectedOrder.phone}`} style={{ textDecoration: 'none', color: '#2196f3', fontWeight: 'bold' }}>{selectedOrder.phone}</a></p>
                             <p><strong>Email:</strong> {selectedOrder.email}</p>
                             <p><strong>Address:</strong> {selectedOrder.address}, {selectedOrder.city}</p>
                         </div>

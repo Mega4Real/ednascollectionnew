@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { usePaystackPayment } from 'react-paystack';
 
-const ReceiptTemplate = ({ orderId, items, total }) => (
+const ReceiptTemplate = ({ orderId, items, total, customer }) => (
     <div id="printable-receipt" style={{
         display: 'none',
         padding: '30px',
@@ -14,6 +14,14 @@ const ReceiptTemplate = ({ orderId, items, total }) => (
             <h2 style={{ margin: '0', letterSpacing: '2px' }}>ERDNA COLLECTIONS</h2>
             <p style={{ fontSize: '12px', color: '#666' }}>Order Receipt #{orderId}</p>
         </div>
+
+        {customer && (
+            <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '4px', fontSize: '14px' }}>
+                <p style={{ margin: '0 0 5px 0' }}><strong>Customer:</strong> {customer.name}</p>
+                <p style={{ margin: '0 0 5px 0' }}><strong>Phone:</strong> {customer.phone}</p>
+                <p style={{ margin: '0' }}><strong>Address:</strong> {customer.address}, {customer.city}</p>
+            </div>
+        )}
 
         <div style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
             <h4 style={{ margin: '0 0 15px 0', fontSize: '16px' }}>Items</h4>
@@ -151,9 +159,11 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
         // 1. Update UI state FIRST
         setSuccessOrder({
-            id: orderId || reference.reference,
+            id: reference.reference, // Use the professional reference string from Paystack
             items: [...selectedItems],
-            total: total
+            total: total,
+            customer: { ...formData },
+            paymentMethod: 'PAYSTACK'
         });
 
         // 2. Then clear the items
@@ -286,10 +296,15 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             return;
         }
 
-        const orderRes = await handleCreateOrder({ paymentMethod: 'WHATSAPP' });
+        const customReference = generateReference();
+        const orderRes = await handleCreateOrder({
+            paymentMethod: 'WHATSAPP',
+            paymentReference: customReference
+        });
 
         const baseUrl = window.location.origin;
         let message = `*NEW ORDER - ERDNA COLLECTIONS*\n\n`;
+        message += `*Order Ref: ${customReference}*\n`;
         message += `*Customer Details:*\n`;
         message += `Name: ${formData.name}\n`;
         message += `Phone: ${formData.phone}\n`;
@@ -317,9 +332,11 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         // Show success screen with receipt option
         if (orderRes && orderRes.order) {
             setSuccessOrder({
-                id: orderRes.order.id,
+                id: customReference,
                 items: [...selectedItems],
-                total: total
+                total: total,
+                customer: { ...formData },
+                paymentMethod: 'WHATSAPP'
             });
         }
 
@@ -419,10 +436,10 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                         <polyline points="20 6 9 17 4 12"></polyline>
                                     </svg>
                                 </div>
-                                <h2>Payment Successful!</h2>
+                                <h2>{successOrder.paymentMethod === 'PAYSTACK' ? 'Payment Successful!' : 'Order Received!'}</h2>
                                 <p className="order-number">Order Reference: <strong>#{successOrder.id}</strong></p>
                                 <div className="thank-you-message">
-                                    <p>Thank you for your purchase!</p>
+                                    <p>Thank you for your {successOrder.paymentMethod === 'PAYSTACK' ? 'purchase' : 'order'}!</p>
                                     <p>Your order has been received and we will contact you shortly to coordinate delivery.</p>
                                 </div>
 
@@ -431,15 +448,16 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     padding: '12px',
                                     marginTop: '10px',
                                     background: '#fff',
-                                    color: '#000',
-                                    border: '1px solid #000',
-                                    borderRadius: '4px',
+                                    color: '#ff69b4',
+                                    border: '1px solid #ff69b4',
+                                    borderRadius: '12px',
                                     fontWeight: 'bold',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '8px'
+                                    gap: '8px',
+                                    transition: 'all 0.3s ease'
                                 }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -449,7 +467,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     PRINT RECEIPT
                                 </button>
 
-                                <button className="checkout-button-new" onClick={() => {
+                                <button className="continue-shopping" onClick={() => {
                                     setSuccessOrder(null);
                                     setIsOpen(false);
                                     setStep('cart');
@@ -604,6 +622,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                     orderId={successOrder.id}
                     items={successOrder.items || []}
                     total={successOrder.total || 0}
+                    customer={successOrder.customer}
                 />
             )}
         </div>

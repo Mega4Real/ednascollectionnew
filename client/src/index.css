@@ -348,14 +348,15 @@ header h1:hover {
 .success-icon {
     width: 64px;
     height: 64px;
-    background: #4caf50;
+    background: linear-gradient(135deg, #ff69b4, #ffb6c1);
     color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 0.5rem;
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    border: 3px solid #fff;
 }
 
 .success-icon svg {
@@ -364,10 +365,12 @@ header h1:hover {
 }
 
 .success-screen h2 {
-    color: #111;
+    color: #ff69b4;
+    font-family: 'Amsterdam One', cursive;
     margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: normal;
+    letter-spacing: 1px;
 }
 
 .order-number {
@@ -602,17 +605,22 @@ header h1:hover {
 }
 
 .form-group input {
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 0.85rem;
+    border: 1.5px solid #ffe4e1;
+    /* Misty Rose */
+    border-radius: 12px;
     font-size: 0.95rem;
-    transition: border-color 0.2s;
+    transition: all 0.3s ease;
+    background-color: #fffafb;
+    /* Very light pink hint */
 }
 
 .form-group input:focus {
     outline: none;
     border-color: #ff69b4;
-    box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.1);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+    transform: translateY(-1px);
 }
 
 .paystack-button-new:disabled,
