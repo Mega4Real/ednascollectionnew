@@ -1591,7 +1591,7 @@ header h1:hover {
 
     .hero-content {
         padding: 2rem 1rem;
-        transform: translateY(-5rem); /* Move content up more to avoid covering face */
+        transform: translateY(-7rem); /* Move content up more to avoid covering face */
     }
 
     .hero-title {
@@ -1610,7 +1610,7 @@ header h1:hover {
         padding: 0.8rem 2.5rem;
         font-size: 1.1rem;
         letter-spacing: 1px;
-        transform: translateY(5.5rem); /* Move button down a bit more */
+        transform: translateY(5rem); /* Move button down a bit more */
     }
 }
 
@@ -1620,7 +1620,7 @@ header h1:hover {
     }
 
     .hero-title {
-        font-size: clamp(1.8rem, 11vw, 2.5rem);
+        font-size: clamp(2rem, 15vw, 4rem);
         margin-bottom: 0.7rem;
     }
 
@@ -1641,7 +1641,7 @@ header h1:hover {
     }
 
     .hero-title {
-        font-size: clamp(1.6rem, 10vw, 2.2rem);
+        font-size: clamp(2.2rem, 12vw, 3rem);
         letter-spacing: 0.5px;
         margin-bottom: 0.6rem;
     }

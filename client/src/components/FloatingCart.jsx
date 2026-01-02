@@ -382,6 +382,18 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         }
     };
 
+    // Helper to optimize the Cloudinary URL for images
+    const getOptimizedImageUrl = (url) => {
+        if (!url) return '';
+        // Check if it's a Cloudinary URL
+        if (url.includes('cloudinary.com')) {
+            // Insert transformation parameters: w_500 (width 500px), q_auto (auto quality), f_auto (auto format)
+            // This assumes standard Cloudinary URL structure: .../upload/v12345/...
+            return url.replace('/upload/', '/upload/w_500,q_auto,f_auto/');
+        }
+        return url;
+    };
+
     const handleSendToWhatsApp = async (e) => {
         if (e) e.preventDefault();
         if (isProcessing) return;
@@ -409,7 +421,8 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
             selectedItems.forEach(item => {
                 const imageUrl = item.imageUrl || item.image;
-                const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${baseUrl}/${imageUrl}`;
+                const optimizedImageUrl = getOptimizedImageUrl(imageUrl);
+                const fullImageUrl = optimizedImageUrl.startsWith('http') ? optimizedImageUrl : `${baseUrl}/${optimizedImageUrl}`;
 
                 message += ` View: ${fullImageUrl}\n`;
                 message += ` Size: ${item.selectedSize}\n`;
