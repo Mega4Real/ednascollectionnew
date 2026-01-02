@@ -23,15 +23,17 @@ exports.createOrder = async (req, res) => {
                 phone,
                 address,
                 city,
-                totalAmount,
+                // Ensure totalAmount is a Float/Decimal
+                totalAmount: parseFloat(totalAmount),
                 paymentMethod,
                 paymentReference,
-                status: paymentMethod === 'PAYSTACK' ? 'PAID' : 'PENDING',
+                status: 'PENDING',
                 items: {
                     create: items.map(item => ({
-                        productId: item.productId,
+                        // Ensure productId is an Integer
+                        productId: parseInt(item.productId),
                         size: item.selectedSize || item.size,
-                        price: item.price
+                        price: parseFloat(item.price)
                     }))
                 }
             },
@@ -105,12 +107,27 @@ exports.getOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, paymentReference } = req.body;
 
         const order = await prisma.order.update({
-            where: { id: parseInt(id) },
-            data: { status }
+            where: { id: parseInt(id) }, // Ensure this is parsed!
+            data: {
+                status,
+                ...(paymentReference && { paymentReference })
+            },
+            include: {
+                items: true
+            }
         });
+
+        // Auto-mark products as sold if status is updated to PAID
+        if (status === 'PAID') {
+            const productIds = order.items.map(item => item.productId);
+            await prisma.product.updateMany({
+                where: { id: { in: productIds } },
+                data: { isSold: true }
+            });
+        }
 
         res.status(200).json({
             success: true,

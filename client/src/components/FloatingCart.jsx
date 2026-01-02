@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PaystackButton } from 'react-paystack';
+import { usePaystackPayment } from 'react-paystack';
 
 const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -12,7 +12,19 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         address: '',
         city: ''
     });
+    const [successOrder, setSuccessOrder] = useState(null);
+
+    const getOptimizedImageUrl = (url) => {
+        if (!url) return '';
+        if (url.includes('cloudinary.com')) {
+            return url.replace('/upload/', '/upload/w_500,q_auto,f_auto/');
+        }
+        return url;
+    };
+
     const cartRef = useRef(null);
+    const formRef = useRef(null);
+    const pendingOrderId = useRef(null);
 
     const total = selectedItems.reduce((sum, item) => sum + item.price, 0);
     const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
@@ -55,34 +67,57 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         }
     };
 
-    const handlePaystackSuccessAction = async (reference) => {
-        console.log("Payment successful! Reference:", reference);
-        await handleCreateOrder({
-            paymentMethod: 'PAYSTACK',
-            paymentReference: reference.reference
-        });
+    const updateOrderStatusOnServer = async (orderId, status, paymentReference = null) => {
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status, paymentReference })
+            });
+            if (!response.ok) throw new Error('Failed to update order status');
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating order status:', error);
+        }
+    };
+
+    const handlePaystackSuccessAction = (reference) => {
+        console.log("SUCCESS HANDLER HIT", reference); // Check for this!
+
+        const orderId = pendingOrderId.current;
+
+        // Force the UI update
+        setSuccessOrder({ id: orderId || reference.reference });
+
+        // Ensure this function exists before calling
+        if (typeof onClearCart === 'function') {
+            onClearCart();
+        } else {
+            console.warn("onClearCart is not a function!");
+        }
+
+        if (orderId) {
+            updateOrderStatusOnServer(orderId, 'PAID', reference.reference);
+        }
 
         // Clear product cache so SOLD badge appears immediately
         localStorage.removeItem('cachedProducts');
-
-        alert("Payment successful! Your order has been placed.");
-        if (onClearCart) onClearCart();
-        setIsOpen(false);
-        setStep('cart');
     };
 
     const handlePaystackCloseAction = () => {
-        // Implementation for what happens when the checkout form is closed
-        console.log('Payment closed');
+        const orderId = pendingOrderId.current;
+        console.log('PAYSTACK: Modal closed for order:', orderId);
+        if (orderId) {
+            updateOrderStatusOnServer(orderId, 'CANCELLED')
+                .catch(err => console.error("PAYSTACK: Failed to update status on close:", err));
+        }
     };
 
     const componentProps = {
-        email: formData.email || "customer@example.com",
+        email: formData.email || 'customer@example.com',
         amount: Math.round(total * 100),
         publicKey,
-        text: "PAY ONLINE (MOBILE MONEY / CARD)",
-        onSuccess: (reference) => handlePaystackSuccessAction(reference),
-        onClose: handlePaystackCloseAction,
         currency: "GHS",
         metadata: {
             custom_fields: [
@@ -97,10 +132,66 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                     value: formData.phone
                 }
             ]
+        },
+        onSuccess: handlePaystackSuccessAction,
+        onClose: handlePaystackCloseAction
+    };
+
+    const initializePayment = usePaystackPayment(componentProps);
+
+    const handlePaystackButtonClick = async (e) => {
+        if (e) e.preventDefault();
+
+        if (formRef.current && formRef.current.reportValidity()) {
+            try {
+                const orderRes = await handleCreateOrder({ paymentMethod: 'PAYSTACK' });
+
+                if (orderRes && orderRes.order) {
+                    // We use the ID returned from your FIXED backend
+                    const currentId = orderRes.order.id;
+                    pendingOrderId.current = currentId;
+
+                    // TRIGGER PAYSTACK WITH DIRECT CALLBACKS
+                    initializePayment(
+                        // SUCCESS CALLBACK
+                        (reference) => {
+                            console.log("Paystack Success:", reference);
+
+                            // 1. Show Success UI
+                            setSuccessOrder({ id: currentId });
+
+                            // 2. Clear the cart
+                            if (onClearCart) onClearCart();
+
+                            // 3. Update server background
+                            updateOrderStatusOnServer(currentId, 'PAID', reference.reference);
+
+                            // Clear product cache so SOLD badge appears immediately
+                            localStorage.removeItem('cachedProducts');
+                        },
+                        // CLOSE CALLBACK
+                        () => {
+                            console.log("Paystack Modal Closed");
+                            handlePaystackCloseAction();
+                        }
+                    );
+                } else {
+                    console.error("PAYSTACK: No order object in response");
+                    alert("Failed to initiate order. Please try again.");
+                }
+            } catch (error) {
+                console.error("Payment initiation failed:", error);
+                alert("An error occurred. Please try again.");
+            }
         }
     };
 
-    const handleSendToWhatsApp = async () => {
+    const handleSendToWhatsApp = async (e) => {
+        if (e) e.preventDefault();
+        if (formRef.current && !formRef.current.reportValidity()) {
+            return;
+        }
+
         // Save order to backend first
         await handleCreateOrder({ paymentMethod: 'WHATSAPP' });
 
@@ -184,175 +275,206 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         };
     }, []);
 
-    if (selectedItems.length === 0) return null;
+    if (selectedItems.length === 0 && !successOrder) return null;
 
     return (
-        <div className={`floating-cart-wrapper ${!isVisible ? 'hide' : ''} ${isOpen ? 'open' : ''}`} ref={cartRef}>
-            {/* Round Toggle Button (FAB) */}
-            <button
-                className={`cart-fab ${isOpen ? 'active' : ''}`}
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label="Toggle Cart"
+        <div className={`floating-cart-wrapper ${isOpen ? 'cart-open' : ''}`}>
+            {/* The cart button itself */}
+            <div
+                className="floating-cart-new"
+                onClick={() => setIsOpen(true)}
             >
-                <div className="cart-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                <div className="cart-icon-wrapper-new">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
+                    {selectedItems.length > 0 && (
+                        <span className="cart-count-new">{selectedItems.length}</span>
+                    )}
                 </div>
-                <span className="cart-badge">{selectedItems.length}</span>
-            </button>
+            </div>
 
-            {/* Expanded Content (Popup/Modal) */}
-            {isOpen && (
-                <div className="cart-popup-overlay" onClick={() => setIsOpen(false)}>
-                    <div className="cart-popup-new" onClick={(e) => e.stopPropagation()}>
-                        <div className="cart-header-new">
-                            <h3>{step === 'cart' ? `Selected Items (${selectedItems.length})` : 'Delivery Details'}</h3>
-                            <button className="close-cart-new" onClick={() => { setIsOpen(false); setStep('cart'); }}>×</button>
-                        </div>
-
-                        {step === 'cart' ? (
-                            <>
-                                <div className="selected-items-new">
-                                    {selectedItems.map(item => (
-                                        <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
-                                            <div className="item-image-container">
-                                                <img src={item.imageUrl || item.image} alt={item.name} />
-                                            </div>
-                                            <div className="item-info-new">
-                                                <span className="item-size-label">Size: {item.selectedSize}</span>
-                                                <span className="item-price-new">GH₵{item.price.toFixed(2)}</span>
-                                            </div>
-                                            <button
-                                                className="remove-item-new"
-                                                onClick={() => onRemoveItem(item.id)}
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="cart-summary-new">
-                                    <div className="total-line-new">
-                                        <strong>Total</strong>
-                                        <strong>GH₵{total.toFixed(2)}</strong>
-                                    </div>
-
-                                    <button
-                                        className="checkout-button-new"
-                                        onClick={() => setStep('checkout')}
-                                        style={{ background: '#000' }}
-                                    >
-                                        PROCEED TO CHECKOUT
-                                    </button>
-
-                                    <button className="continue-shopping" onClick={() => setIsOpen(false)}>
-                                        Continue Shopping
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="delivery-form-container">
-                                <div className="delivery-form">
-                                    <div className="form-group">
-                                        <label>Full Name</label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            placeholder="Your Name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Email Address</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            placeholder="your@email.com"
-                                            value={formData.email}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Phone Number</label>
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            placeholder="024 XXX XXXX"
-                                            value={formData.phone}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Delivery Address</label>
-                                        <input
-                                            type="text"
-                                            name="address"
-                                            placeholder="House No / Street / Landmark"
-                                            value={formData.address}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>City / Area</label>
-                                        <input
-                                            type="text"
-                                            name="city"
-                                            placeholder="Accra, Kumasi, etc."
-                                            value={formData.city}
-                                            onChange={handleInputChange}
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="cart-summary-new">
-                                    <div className="total-line-new">
-                                        <strong>Total</strong>
-                                        <strong>GH₵{total.toFixed(2)}</strong>
-                                    </div>
-
-                                    <button
-                                        className="whatsapp-button-new"
-                                        onClick={handleSendToWhatsApp}
-                                        disabled={!formData.name || !formData.phone || !formData.address}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="20"
-                                            height="20"
-                                            viewBox="0 0 24 24"
-                                            fill="currentColor"
-                                            style={{ marginRight: '8px', verticalAlign: 'middle' }}
-                                        >
-                                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-4.143c1.589.943 3.385 1.44 5.216 1.441 5.399 0 9.794-4.395 9.797-9.796.002-2.618-1.017-5.078-2.868-6.931-1.851-1.854-4.312-2.873-6.93-2.875-5.398 0-9.793 4.396-9.797 9.797-.001 1.83.479 3.618 1.391 5.187l-.893 3.266 3.344-.876.538-.303zm10.516-5.835c-.289-.145-1.713-.847-1.978-.942-.266-.096-.459-.145-.653.145-.193.291-.748.944-.917 1.138-.17.19-.339.213-.628.068-.289-.145-1.22-.449-2.325-1.434-.86-.766-1.44-1.712-1.608-2.002-.17-.29-.018-.447.127-.591.13-.13.29-.339.435-.508.145-.17.193-.29.289-.483.097-.193.048-.363-.024-.508-.072-.145-.653-1.573-.895-2.153-.235-.569-.476-.491-.653-.5-.17-.008-.364-.01-.557-.01-.193 0-.508.072-.773.362-.266.291-1.015.992-1.015 2.418 0 1.425 1.039 2.805 1.185 3.001.145.193 2.043 3.12 4.949 4.373.692.298 1.231.476 1.652.609.697.221 1.332.19 1.834.115.56-.083 1.713-.699 1.954-1.374.242-.676.242-1.257.17-1.374-.072-.117-.266-.19-.556-.335z" />
-                                        </svg>
-                                        COMPLETE ON WHATSAPP
-                                    </button>
-
-                                    <PaystackButton
-                                        className="paystack-button-new"
-                                        {...componentProps}
-                                        disabled={!formData.name || !formData.phone || !formData.address || !formData.email}
-                                    />
-
-                                    <button className="continue-shopping" onClick={() => setStep('cart')}>
-                                        ← Back to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        )}
+            {/* Always render items for preloading, maar hide/show via CSS */}
+            <div className={`cart-popup-overlay ${isOpen ? 'active' : ''}`} onClick={() => setIsOpen(false)}>
+                <div className="cart-popup-new" onClick={(e) => e.stopPropagation()}>
+                    <div className="cart-header-new">
+                        <h3>{successOrder ? 'Order Confirmed' : (step === 'cart' ? 'Your Cart' : 'Checkout')}</h3>
+                        <button className="close-cart-new" onClick={() => {
+                            setIsOpen(false);
+                            setStep('cart');
+                            setSuccessOrder(null);
+                        }}>×</button>
                     </div>
+
+                    {successOrder ? (
+                        <div className="success-screen">
+                            <div className="success-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <h2>Payment Successful!</h2>
+                            <p className="order-number">Order Reference: <strong>#{successOrder.id}</strong></p>
+                            <div className="thank-you-message">
+                                <p>Thank you for your purchase!</p>
+                                <p>Your order has been received and we will contact you shortly to coordinate delivery.</p>
+                            </div>
+                            <button className="checkout-button-new" onClick={() => {
+                                setSuccessOrder(null);
+                                setIsOpen(false);
+                                setStep('cart');
+                            }}>
+                                DONE
+                            </button>
+                        </div>
+                    ) : step === 'cart' ? (
+                        <>
+                            <div className="selected-items-new">
+                                {selectedItems.map(item => (
+                                    <div key={`${item.id}-${item.selectedSize}`} className="cart-item-card">
+                                        <div className="item-image-container">
+                                            <img
+                                                src={getOptimizedImageUrl(item.imageUrl || item.image)}
+                                                alt={item.name}
+                                                width="50"
+                                                height="60"
+                                                decoding="async"
+                                                fetchpriority="high"
+                                            />
+                                        </div>
+                                        <div className="item-info-new">
+                                            <span className="item-size-label">Size: {item.selectedSize}</span>
+                                            <span className="item-price-new">GH₵{item.price.toFixed(2)}</span>
+                                        </div>
+                                        <button
+                                            className="remove-item-new"
+                                            onClick={() => onRemoveItem(item.id)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="cart-summary-new">
+                                <div className="total-line-new">
+                                    <strong>Total</strong>
+                                    <strong>GH₵{total.toFixed(2)}</strong>
+                                </div>
+
+                                <button
+                                    className="checkout-button-new"
+                                    onClick={() => setStep('checkout')}
+                                    style={{ background: '#000' }}
+                                >
+                                    PROCEED TO CHECKOUT
+                                </button>
+
+                                <button className="continue-shopping" onClick={() => setIsOpen(false)}>
+                                    Continue Shopping
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="delivery-form-container">
+                            <form ref={formRef} className="delivery-form" onSubmit={(e) => e.preventDefault()}>
+                                <div className="form-group">
+                                    <label>Full Name</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Your Name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Email Address</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="your@email.com"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        placeholder="024 XXX XXXX"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Delivery Address</label>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        placeholder="House No / Street / Landmark"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>City / Area</label>
+                                    <input
+                                        type="text"
+                                        name="city"
+                                        placeholder="Accra, Kumasi, etc."
+                                        value={formData.city}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                            </form>
+
+                            <div className="cart-summary-new">
+                                <div className="total-line-new">
+                                    <strong>Total</strong>
+                                    <strong>GH₵{total.toFixed(2)}</strong>
+                                </div>
+
+                                <button
+                                    className="whatsapp-button-new"
+                                    onClick={handleSendToWhatsApp}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        style={{ marginRight: '8px', verticalAlign: 'middle' }}
+                                    >
+                                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-4.143c1.589.943 3.385 1.44 5.216 1.441 5.399 0 9.794-4.395 9.797-9.796.002-2.618-1.017-5.078-2.868-6.931-1.851-1.854-4.312-2.873-6.93-2.875-5.398 0-9.793 4.396-9.797 9.797-.001 1.83.479 3.618 1.391 5.187l-.893 3.266 3.344-.876.538-.303zm10.516-5.835c-.289-.145-1.713-.847-1.978-.942-.266-.096-.459-.145-.653.145-.193.291-.748.944-.917 1.138-.17.19-.339.213-.628.068-.289-.145-1.22-.449-2.325-1.434-.86-.766-1.44-1.712-1.608-2.002-.17-.29-.018-.447.127-.591.13-.13.29-.339.435-.508.145-.17.193-.29.289-.483.097-.193.048-.363-.024-.508-.072-.145-.653-1.573-.895-2.153-.235-.569-.476-.491-.653-.5-.17-.008-.364-.01-.557-.01-.193 0-.508.072-.773.362-.266.291-1.015.992-1.015 2.418 0 1.425 1.039 2.805 1.185 3.001.145.193 2.043 3.12 4.949 4.373.692.298 1.231.476 1.652.609.697.221 1.332.19 1.834.115.56-.083 1.713-.699 1.954-1.374.242-.676.242-1.257.17-1.374-.072-.117-.266-.19-.556-.335z" />
+                                    </svg>
+                                    COMPLETE ON WHATSAPP
+                                </button>
+
+                                <button
+                                    className="paystack-button-new"
+                                    onClick={handlePaystackButtonClick}
+                                >
+                                    PAY ONLINE (MOBILE MONEY / CARD)
+                                </button>
+
+                                <button className="continue-shopping" onClick={() => setStep('cart')}>
+                                    ← Back to Cart
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
         </div>
     );
 };

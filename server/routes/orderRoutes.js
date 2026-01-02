@@ -6,9 +6,11 @@ const auth = require('../middleware/auth');
 // Public route to create an order
 router.post('/', orderController.createOrder);
 
+// Public route to update order status (e.g., Paystack callback/frontend update)
+router.put('/:id/status', orderController.updateOrderStatus);
+
 // Protected routes for admin
 router.get('/', auth, orderController.getOrders);
-router.put('/:id/status', auth, orderController.updateOrderStatus);
 router.delete('/:id', auth, orderController.deleteOrder);
 
 module.exports = router;

@@ -1,0 +1,15 @@
+{
+    "name": "ednascollection-root",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev:client": "npm run dev --prefix client",
+        "dev:server": "npm run dev --prefix server",
+        "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+        "install-all": "npm install --prefix client && npm install --prefix server",
+        "postinstall": "npm run install-all"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.1"
+    }
+}
