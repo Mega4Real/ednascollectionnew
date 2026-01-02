@@ -1,6 +1,77 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { usePaystackPayment } from 'react-paystack';
 
+const ReceiptTemplate = ({ orderId, items, total }) => (
+    <div id="printable-receipt" style={{
+        display: 'none',
+        padding: '30px',
+        fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+        color: '#333',
+        maxWidth: '500px',
+        margin: '0 auto'
+    }}>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <h2 style={{ margin: '0', letterSpacing: '2px' }}>ERDNA COLLECTIONS</h2>
+            <p style={{ fontSize: '12px', color: '#666' }}>Order Receipt #{orderId}</p>
+        </div>
+
+        <div style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
+            <h4 style={{ margin: '0 0 15px 0', fontSize: '16px' }}>Items</h4>
+
+            {items.map((item, index) => (
+                <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 0',
+                    borderBottom: '1px solid #f9f9f9'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <img
+                            src={item.imageUrl || item.image}
+                            alt={item.name}
+                            style={{ width: '50px', height: '60px', borderRadius: '4px', objectFit: 'cover' }}
+                        />
+                        <div>
+                            <p style={{ margin: '0', fontWeight: 'bold', fontSize: '14px' }}>
+                                Product ID: {item.id}
+                            </p>
+                            <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>
+                                Size: {item.selectedSize}
+                            </p>
+                        </div>
+                    </div>
+                    <p style={{ margin: '0', fontWeight: 'bold' }}>
+                        ₵{item.price.toFixed(2)}
+                    </p>
+                </div>
+            ))}
+        </div>
+
+        <div style={{
+            marginTop: '20px',
+            paddingTop: '15px',
+            borderTop: '2px solid #333',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+        }}>
+            <h3 style={{ margin: '0' }}>Total</h3>
+            <h3 style={{ margin: '0' }}>₵{total.toFixed(2)}</h3>
+        </div>
+
+        <p style={{
+            fontSize: '10px',
+            marginTop: '40px',
+            textAlign: 'center',
+            color: '#999',
+            textTransform: 'uppercase'
+        }}>
+            Thank you for shopping with Erdnas Collections
+        </p>
+    </div>
+);
+
 const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +150,11 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         const orderId = pendingOrderId.current;
 
         // 1. Update UI state FIRST
-        setSuccessOrder({ id: orderId || reference.reference });
+        setSuccessOrder({
+            id: orderId || reference.reference,
+            items: [...selectedItems],
+            total: total
+        });
 
         // 2. Then clear the items
         if (typeof onClearCart === 'function') {
@@ -127,7 +202,44 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         onClose: handlePaystackCloseAction
     };
 
+    const handlePrintReceipt = () => {
+        const printContent = document.getElementById('printable-receipt');
+        if (!printContent) return;
+
+        const WinPrint = window.open('', '', 'width=900,height=650');
+
+        WinPrint.document.write(`
+            <html>
+                <head>
+                    <title>Order Receipt</title>
+                    <style>
+                        body { margin: 0; padding: 0; font-family: sans-serif; }
+                        img { max-width: 100%; }
+                    </style>
+                </head>
+                <body>
+                    <div style="display: block !important;">
+                        ${printContent.innerHTML}
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            window.close();
+                        };
+                    </script>
+                </body>
+            </html>
+        `);
+        WinPrint.document.close();
+    };
+
     const initializePayment = usePaystackPayment(componentProps);
+
+    const generateReference = () => {
+        const date = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // e.g., 20240102
+        const random = Math.random().toString(36).substring(2, 7).toUpperCase(); // e.g., 5X9RT
+        return `ERDNA-${date}-${random}`;
+    };
 
     const handlePaystackButtonClick = async (e) => {
         if (e) e.preventDefault();
@@ -136,18 +248,27 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         if (formRef.current && formRef.current.reportValidity()) {
             setIsProcessing(true);
             try {
-                // 1. Create the order on your backend
-                const orderRes = await handleCreateOrder({ paymentMethod: 'PAYSTACK' });
+                // 1. Generate the professional unique reference FIRST
+                const customReference = generateReference();
+
+                // 2. Create the order on your backend with the custom reference
+                const orderRes = await handleCreateOrder({
+                    paymentMethod: 'PAYSTACK',
+                    paymentReference: customReference
+                });
 
                 if (orderRes && orderRes.order) {
-                    // 2. Store the ID in the ref so the success handler can find it
+                    // 3. Store the ID in the ref so the success handler can find it
                     pendingOrderId.current = orderRes.order.id;
 
-                    // 3. Trigger the Paystack popup
-                    // FIX: Pass componentProps directly into initializePayment
-                    // This prevents the 'reading config' undefined error
-                    console.log("Paystack Config Check:", componentProps);
-                    initializePayment(componentProps);
+                    // 4. Trigger the Paystack popup with the SAME professional reference
+                    const paystackConfig = {
+                        ...componentProps,
+                        reference: customReference,
+                    };
+
+                    console.log("Paystack Config with Professional Reference:", paystackConfig);
+                    initializePayment(paystackConfig);
                 } else {
                     alert("Order creation failed on server.");
                 }
@@ -165,11 +286,10 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             return;
         }
 
-        // Save order to backend first
-        await handleCreateOrder({ paymentMethod: 'WHATSAPP' });
+        const orderRes = await handleCreateOrder({ paymentMethod: 'WHATSAPP' });
 
         const baseUrl = window.location.origin;
-        let message = `*NEW ORDER - EDNAS COLLECTIONS*\n\n`;
+        let message = `*NEW ORDER - ERDNA COLLECTIONS*\n\n`;
         message += `*Customer Details:*\n`;
         message += `Name: ${formData.name}\n`;
         message += `Phone: ${formData.phone}\n`;
@@ -194,9 +314,17 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
         window.open(whatsappUrl, '_blank');
 
-        // Clear cart and reset state
+        // Show success screen with receipt option
+        if (orderRes && orderRes.order) {
+            setSuccessOrder({
+                id: orderRes.order.id,
+                items: [...selectedItems],
+                total: total
+            });
+        }
+
+        // Clear cart
         if (onClearCart) onClearCart();
-        setStep('cart');
     };
 
     useEffect(() => {
@@ -297,6 +425,30 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     <p>Thank you for your purchase!</p>
                                     <p>Your order has been received and we will contact you shortly to coordinate delivery.</p>
                                 </div>
+
+                                <button className="print-receipt-button" onClick={handlePrintReceipt} style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    marginTop: '10px',
+                                    background: '#fff',
+                                    color: '#000',
+                                    border: '1px solid #000',
+                                    borderRadius: '4px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                        <rect x="6" y="14" width="12" height="8"></rect>
+                                    </svg>
+                                    PRINT RECEIPT
+                                </button>
+
                                 <button className="checkout-button-new" onClick={() => {
                                     setSuccessOrder(null);
                                     setIsOpen(false);
@@ -445,6 +597,14 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                         )}
                     </div>
                 </div>
+            )}
+
+            {successOrder && (
+                <ReceiptTemplate
+                    orderId={successOrder.id}
+                    items={successOrder.items || []}
+                    total={successOrder.total || 0}
+                />
             )}
         </div>
     );
