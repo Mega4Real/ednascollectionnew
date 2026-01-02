@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const crypto = require('crypto');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -178,5 +179,55 @@ exports.deleteOrder = async (req, res) => {
             message: 'Failed to delete order',
             error: error.message
         });
+    }
+};
+
+exports.handlePaystackWebhook = async (req, res) => {
+    try {
+        // 1. Verify the event is actually from Paystack
+        const hash = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+            .update(JSON.stringify(req.body))
+            .digest('hex');
+
+        if (hash !== req.headers['x-paystack-signature']) {
+            console.error('Webhook Signature Verification Failed');
+            return res.status(401).send('Invalid Signature');
+        }
+
+        const event = req.body;
+
+        // 2. Only listen for successful payments
+        if (event.event === 'charge.success') {
+            const reference = event.data.reference;
+
+            // 3. Find the order by reference and update it
+            const order = await prisma.order.findFirst({
+                where: { paymentReference: reference },
+                include: { items: true }
+            });
+
+            if (order) {
+                await prisma.order.update({
+                    where: { id: order.id },
+                    data: { status: 'PAID' }
+                });
+
+                // 4. Mark products as sold (Server-side safety)
+                const productIds = order.items.map(item => item.productId);
+                await prisma.product.updateMany({
+                    where: { id: { in: productIds } },
+                    data: { isSold: true }
+                });
+
+                console.log(`Order ${order.id} verified via Webhook! Reference: ${reference}`);
+            } else {
+                console.warn(`Webhook received for reference ${reference}, but order not found.`);
+            }
+        }
+
+        res.sendStatus(200); // Always send 200 to Paystack so they stop retrying
+    } catch (error) {
+        console.error('Webhook Error:', error);
+        res.sendStatus(500);
     }
 };
