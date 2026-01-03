@@ -1612,7 +1612,7 @@ header h1:hover {
 @media (max-width: 768px) {
     .hero-section {
         min-height: 100svh;
-        margin-top: -4rem;
+        margin-top: -3.5rem;
     }
 
     .hero-overlay {
@@ -1621,17 +1621,17 @@ header h1:hover {
 
     .hero-content {
         padding: 2rem 1rem;
-        transform: translateY(-7rem); /* Move content up more to avoid covering face */
+        transform: translateY(-10rem); /* Move content up more to avoid covering face */
     }
 
     .hero-title {
-        font-size: clamp(2rem, 12vw, 3rem);
+        font-size: clamp(2.5rem, 12vw, 3rem);
         letter-spacing: 1px;
         margin-bottom: 0.8rem;
     }
 
     .hero-motto {
-        font-size: clamp(0.9rem, 4vw, 1.2rem);
+        font-size: clamp(1.1rem, 4vw, 1.5rem);
         margin-bottom: 2rem;
         letter-spacing: 1px;
     }
@@ -1640,7 +1640,7 @@ header h1:hover {
         padding: 0.8rem 2.5rem;
         font-size: 1.1rem;
         letter-spacing: 1px;
-        transform: translateY(5rem); /* Move button down a bit more */
+        transform: translateY(6rem); /* Move button down a bit more */
     }
 }
 
@@ -1650,12 +1650,12 @@ header h1:hover {
     }
 
     .hero-title {
-        font-size: clamp(2rem, 15vw, 4rem);
+        font-size: clamp(2.2rem, 15vw, 4rem);
         margin-bottom: 0.7rem;
     }
 
     .hero-motto {
-        font-size: clamp(0.85rem, 4.5vw, 1.1rem);
+        font-size: clamp(0.95rem, 4.5vw, 1.1rem);
         margin-bottom: 1.8rem;
     }
 
@@ -1671,13 +1671,13 @@ header h1:hover {
     }
 
     .hero-title {
-        font-size: clamp(2.2rem, 12vw, 3rem);
+        font-size: clamp(2.4rem, 12vw, 3rem);
         letter-spacing: 0.5px;
         margin-bottom: 0.6rem;
     }
 
     .hero-motto {
-        font-size: clamp(0.8rem, 5vw, 1rem);
+        font-size: clamp(1rem, 5vw, 1rem);
         margin-bottom: 1.5rem;
         letter-spacing: 0.5px;
     }
