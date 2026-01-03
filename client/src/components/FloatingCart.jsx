@@ -529,6 +529,13 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
         };
     }, []);
 
+    // Close cart when the last item is removed
+    useEffect(() => {
+        if (selectedItems.length === 0 && isOpen) {
+            setIsOpen(false);
+        }
+    }, [selectedItems.length, isOpen]);
+
     // ONLY return null if the cart is COMPLETELY empty AND not open AND not showing success
     if (selectedItems.length === 0 && !successOrder && !isOpen) {
         return null;

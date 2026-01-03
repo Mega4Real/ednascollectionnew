@@ -1430,6 +1430,40 @@ header h1:hover {
     background-image: url('/landing-bg.webp'); /* Default desktop image */
 }
 
+.hero-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ff69b4;
+    color: rgb(0, 0, 0);
+    padding: 0.2rem;
+    z-index: 1001;
+    overflow: hidden;
+    white-space: nowrap;
+    height: auto;
+    line-height: 1;
+}
+
+.hero-banner p {
+    display: inline-block;
+    animation: slideText 20s linear infinite;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    margin: 0;
+}
+
+@keyframes slideText {
+    0% {
+        transform: translateX(100%);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
 .hero-overlay {
     position: absolute;
     top: 0;
@@ -1488,10 +1522,6 @@ header h1:hover {
 .hero-button:hover {
     box-shadow: 0 6px 20px rgba(255, 105, 180, 0.6);
     background: linear-gradient(135deg, #ff1493, #ff69b4);
-}
-
-.hero-button:active {
-    /* No transform to prevent button movement on click */
 }
 
 @keyframes fadeInUp {
@@ -1582,7 +1612,7 @@ header h1:hover {
 @media (max-width: 768px) {
     .hero-section {
         min-height: 100svh;
-        margin-top: -2.5rem;
+        margin-top: -4rem;
     }
 
     .hero-overlay {
