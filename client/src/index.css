@@ -1640,7 +1640,7 @@ header h1:hover {
         padding: 0.8rem 2.5rem;
         font-size: 1.1rem;
         letter-spacing: 1px;
-        transform: translateY(6rem); /* Move button down a bit more */
+        transform: translateY(7rem); /* Move button down a bit more */
     }
 }
 
