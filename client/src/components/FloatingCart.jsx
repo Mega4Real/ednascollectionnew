@@ -218,7 +218,10 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
             const res = await fetch(`${API_URL}/api/discounts/validate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code: discountCode })
+                body: JSON.stringify({
+                    code: discountCode,
+                    itemCount: selectedItems.length
+                })
             });
             const data = await res.json();
 
