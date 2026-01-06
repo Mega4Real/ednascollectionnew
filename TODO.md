@@ -1,0 +1,8 @@
+- [ ] Add imports for useRef to AdminDashboard.jsx
+- [ ] Add state to track the last activity timestamp using useState
+- [ ] Add a useRef for the logout timer to manage the timeout
+- [ ] Create a resetTimer function that updates the last activity timestamp and sets/resets a timeout to check for inactivity
+- [ ] Add useEffect to set up event listeners for user activity events (mousedown, mousemove, keypress, scroll, touchstart) that call resetTimer
+- [ ] Initialize the timer on component mount
+- [ ] Add cleanup for event listeners and clear the timer on component unmount
+- [ ] Implement the timeout logic to check for 1 hour inactivity and call handleLogout

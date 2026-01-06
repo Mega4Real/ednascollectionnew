@@ -20,6 +20,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/discounts', require('./routes/discounts'));
 
 // Health check
 app.get('/health', (req, res) => {

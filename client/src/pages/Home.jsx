@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
+import { Helmet } from 'react-helmet-async';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import ProductCard from '../components/ProductCard';
@@ -251,6 +252,24 @@ const Home = () => {
 
     return (
         <div className="app-container">
+            <Helmet>
+                <title>Erdnas Collections - Authentic Dress Gallery | Shop Affordable Fashion</title>
+                <meta name="description" content="Discover Erdnas Collections - your authentic dress plug for affordable, high-quality fashion. Shop our curated collection of dresses, sizes S-18, with secure checkout and fast delivery." />
+
+                {/* Open Graph / Facebook */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://erdnascollections.com/" />
+                <meta property="og:title" content="Erdnas Collections - Authentic Dress Gallery" />
+                <meta property="og:description" content="Discover Erdnas Collections - your authentic dress plug for affordable, high-quality fashion. Shop our curated collection of dresses, sizes S-18." />
+                <meta property="og:image" content="https://erdnascollections.com/landing-mobile.webp" />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:url" content="https://erdnascollections.com/" />
+                <meta property="twitter:title" content="Erdnas Collections - Authentic Dress Gallery" />
+                <meta property="twitter:description" content="Discover Erdnas Collections - your authentic dress plug for affordable, high-quality fashion. Shop our curated collection of dresses, sizes S-18." />
+                <meta property="twitter:image" content="https://erdnascollections.com/landing-mobile.webp" />
+            </Helmet>
             <Header
                 filters={filters}
                 setFilters={setFilters}

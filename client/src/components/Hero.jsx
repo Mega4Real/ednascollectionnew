@@ -31,11 +31,9 @@ const Hero = forwardRef(({ onEnterShop }, ref) => {
             className="hero-section"
             style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.webp' : '/landing-bg.webp'})` }}
         >
-            {isMobile && (
                 <div className="hero-banner">
-                    <p>Welcome to Erdnas Collections | Experience the best online shopping | Shop Now For Affordable Prices </p>
+                    <p>Welcome to Erdnas Collections | Free Delivery For 2 or More Dresses | Shop Now For Affordable Prices </p>
                 </div>
-            )}
             <div className="hero-overlay"></div>
 
             <div className="hero-content">

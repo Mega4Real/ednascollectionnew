@@ -159,6 +159,12 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const [loadedImages, setLoadedImages] = useState(new Set());
     const [imageLoadingStates, setImageLoadingStates] = useState(new Map());
 
+    // Discount Code State
+    const [discountCode, setDiscountCode] = useState('');
+    const [appliedDiscount, setAppliedDiscount] = useState(null); // { code, type, value }
+    const [discountError, setDiscountError] = useState('');
+    const [isVerifyingDiscount, setIsVerifyingDiscount] = useState(false);
+
     // Preload images when items are added to cart
     const preloadImage = useCallback((src) => {
         return new Promise((resolve, reject) => {
@@ -190,7 +196,46 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     const cartPopupRef = useRef(null);
     const pendingOrderId = useRef(null);
 
-    const total = selectedItems.reduce((sum, item) => sum + item.price, 0);
+    const cartTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+
+    const calculateTotal = () => {
+        if (!appliedDiscount) return cartTotal;
+        if (appliedDiscount.type === 'PERCENTAGE') {
+            return cartTotal - (cartTotal * (appliedDiscount.value / 100));
+        } else {
+            return Math.max(0, cartTotal - appliedDiscount.value);
+        }
+    };
+
+    const total = calculateTotal();
+
+    const handleApplyDiscount = async () => {
+        if (!discountCode.trim()) return;
+        setIsVerifyingDiscount(true);
+        setDiscountError('');
+        try {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await fetch(`${API_URL}/api/discounts/validate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: discountCode })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                setDiscountError(data.message || 'Invalid code');
+                setAppliedDiscount(null);
+            } else {
+                setAppliedDiscount(data);
+                setDiscountError('');
+            }
+        } catch (error) {
+            setDiscountError('Error validating code');
+        } finally {
+            setIsVerifyingDiscount(false);
+        }
+    };
+
     const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
 
     const handleInputChange = (e) => {
@@ -208,6 +253,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                 address: formData.address,
                 city: formData.city,
                 totalAmount: total,
+                discountCode: appliedDiscount ? appliedDiscount.code : null,
                 paymentMethod: extraData.paymentMethod || 'WHATSAPP',
                 paymentReference: extraData.paymentReference || null,
                 items: selectedItems.map(item => ({
@@ -734,10 +780,68 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     </div>
                                 </form>
 
+                                <div className="discount-form" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Discount Code"
+                                            value={discountCode}
+                                            onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                            disabled={!!appliedDiscount || isVerifyingDiscount}
+                                            style={{
+                                                flex: 1,
+                                                padding: '0.75rem',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '4px',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        />
+                                        <button
+                                            onClick={handleApplyDiscount}
+                                            disabled={!discountCode || !!appliedDiscount || isVerifyingDiscount}
+                                            style={{
+                                                padding: '0.75rem 1rem',
+                                                background: appliedDiscount ? '#2e7d32' : '#333',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: (!!appliedDiscount || !discountCode) ? 'default' : 'pointer',
+                                                fontWeight: 'bold',
+                                                fontSize: '0.9rem'
+                                            }}
+                                        >
+                                            {isVerifyingDiscount ? '...' : appliedDiscount ? '✓' : 'Apply'}
+                                        </button>
+                                    </div>
+                                    {discountError && <div style={{ color: '#d32f2f', fontSize: '0.8rem', marginTop: '0.25rem' }}>{discountError}</div>}
+                                    {appliedDiscount && (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', fontSize: '0.85rem', color: '#2e7d32' }}>
+                                            <span>
+                                                Discount applied: <strong>{appliedDiscount.type === 'PERCENTAGE' ? `${appliedDiscount.value}%` : `₵${appliedDiscount.value}`} OFF</strong>
+                                            </span>
+                                            <button
+                                                onClick={() => { setAppliedDiscount(null); setDiscountCode(''); }}
+                                                style={{ background: 'none', border: 'none', color: '#d32f2f', padding: 0, cursor: 'pointer', fontSize: '0.8rem', textDecoration: 'underline' }}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="cart-summary-new">
-                                    <div className="total-line-new">
+                                    <div className="total-line-new" style={{ alignItems: 'flex-start' }}>
                                         <strong>Total</strong>
-                                        <strong>GH₵{total.toFixed(2)}</strong>
+                                        <div style={{ textAlign: 'right' }}>
+                                            {appliedDiscount && (
+                                                <div style={{ fontSize: '0.9rem', color: '#757575', textDecoration: 'line-through' }}>
+                                                    GH₵{cartTotal.toFixed(2)}
+                                                </div>
+                                            )}
+                                            <div style={{ fontSize: '1.2rem', color: appliedDiscount ? '#2e7d32' : 'inherit' }}>
+                                                GH₵{total.toFixed(2)}
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <button

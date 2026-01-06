@@ -1484,7 +1484,7 @@ header h1:hover {
 .hero-title {
     font-family: 'Amsterdam One', 'Brush Script MT', cursive;
     font-size: clamp(2.5rem, 10vw, 4rem);
-    margin-bottom: 1rem;
+    margin-bottom: 5rem;
     color: #fff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     letter-spacing: 2px;

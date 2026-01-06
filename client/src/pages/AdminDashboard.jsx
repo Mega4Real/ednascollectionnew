@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
@@ -16,9 +17,25 @@ const AdminDashboard = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [orders, setOrders] = useState([]);
     const [activeTab, setActiveTab] = useState('products');
+    const [lastActivity, setLastActivity] = useState(Date.now());
+    const logoutTimerRef = useRef(null);
     const navigate = useNavigate();
 
     const availableSizes = ['S', 'M', 'L', 'XL', '6', '8', '10', '12', '14', '16', '18', '6/8', '8/10', '10/12', '12/14', '14/16', '16/18'];
+
+    // Define resetTimer function
+    const resetTimer = () => {
+        if (logoutTimerRef.current) {
+            clearTimeout(logoutTimerRef.current);
+        }
+
+        setLastActivity(Date.now());
+
+        // Set logout timer for 30 minutes of inactivity
+        logoutTimerRef.current = setTimeout(() => {
+            handleLogout();
+        }, 30 * 60 * 1000); // 30 minutes
+    };
 
     const fetchProducts = async () => {
         try {
@@ -56,6 +73,27 @@ const AdminDashboard = () => {
         fetchProducts();
         fetchOrders();
     }, [navigate]);
+
+    useEffect(() => {
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+        const eventHandler = () => resetTimer();
+
+        events.forEach(event => {
+            document.addEventListener(event, eventHandler, true);
+        });
+
+        resetTimer(); // Initialize timer
+
+        return () => {
+            events.forEach(event => {
+                document.removeEventListener(event, eventHandler, true);
+            });
+            if (logoutTimerRef.current) {
+                clearTimeout(logoutTimerRef.current);
+            }
+        };
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -206,23 +244,90 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleOrderDelete = async (orderId) => {
-        if (!window.confirm('Are you sure you want to delete this completed order?')) return;
+    const [discounts, setDiscounts] = useState([]);
+    const [discountForm, setDiscountForm] = useState({
+        code: '',
+        type: 'PERCENTAGE',
+        value: '',
+        usageLimit: '',
+        expiresAt: ''
+    });
+
+    const fetchDiscounts = async () => {
         try {
             const token = localStorage.getItem('token');
             const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            await axios.delete(`${apiUrl}/api/orders/${orderId}`, {
+            const res = await axios.get(`${apiUrl}/api/discounts`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert('Order deleted successfully');
-            fetchOrders();
+            setDiscounts(res.data);
         } catch (error) {
-            alert(error.response?.data?.message || 'Error deleting order');
+            console.error('Error fetching discounts', error);
         }
     };
 
+    const handleDiscountSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${apiUrl}/api/discounts`, {
+                ...discountForm,
+                value: parseFloat(discountForm.value),
+                usageLimit: discountForm.usageLimit ? parseInt(discountForm.usageLimit) : null
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('Discount created successfully');
+            setDiscountForm({ code: '', type: 'PERCENTAGE', value: '', usageLimit: '', expiresAt: '' });
+            fetchDiscounts();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Error creating discount');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteDiscount = async (id) => {
+        if (!window.confirm('Delete this discount code?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.delete(`${apiUrl}/api/discounts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchDiscounts();
+        } catch (error) {
+            alert('Error deleting discount');
+        }
+    };
+
+    const handleToggleDiscount = async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.put(`${apiUrl}/api/discounts/${id}/toggle`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchDiscounts();
+        } catch (error) {
+            alert('Error updating discount');
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'discounts') {
+            fetchDiscounts();
+        }
+    }, [activeTab]);
+
     return (
         <div className="admin-dashboard" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+            <Helmet>
+                <title>Admin Dashboard - Erdnas Collections</title>
+                <meta name="description" content="Admin dashboard for managing Erdnas Collections products, orders, and inventory." />
+            </Helmet>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Admin Dashboard</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
@@ -253,6 +358,20 @@ const AdminDashboard = () => {
                         }}
                     >
                         Orders ({orders.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('discounts')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            background: activeTab === 'discounts' ? '#ff69b4' : '#eee',
+                            color: activeTab === 'discounts' ? 'white' : '#333',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Discounts
                     </button>
                     <button onClick={handleLogout} style={{ padding: '0.5rem 1rem', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginLeft: '1rem' }}>
                         Logout
@@ -355,6 +474,108 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 </>
+            ) : activeTab === 'discounts' ? (
+                <div className="discounts-section">
+                    <div className="add-product-section" style={{ padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+                        <h2>Create Discount Code</h2>
+                        <form onSubmit={handleDiscountSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'end' }}>
+                            <div>
+                                <label>Code (e.g. SALE10)</label>
+                                <input
+                                    type="text"
+                                    value={discountForm.code}
+                                    onChange={(e) => setDiscountForm({ ...discountForm, code: e.target.value.toUpperCase() })}
+                                    required
+                                    placeholder="Enter code"
+                                    style={{ width: '100%', padding: '0.5rem', textTransform: 'uppercase' }}
+                                />
+                            </div>
+                            <div>
+                                <label>Type</label>
+                                <select
+                                    value={discountForm.type}
+                                    onChange={(e) => setDiscountForm({ ...discountForm, type: e.target.value })}
+                                    style={{ width: '100%', padding: '0.5rem' }}
+                                >
+                                    <option value="PERCENTAGE">Percentage (%)</option>
+                                    <option value="FIXED">Fixed Amount (₵)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Value</label>
+                                <input
+                                    type="number"
+                                    value={discountForm.value}
+                                    onChange={(e) => setDiscountForm({ ...discountForm, value: e.target.value })}
+                                    required
+                                    placeholder="Amount"
+                                    style={{ width: '100%', padding: '0.5rem' }}
+                                />
+                            </div>
+                            <div>
+                                <label>Usage Limit (Optional)</label>
+                                <input
+                                    type="number"
+                                    value={discountForm.usageLimit}
+                                    onChange={(e) => setDiscountForm({ ...discountForm, usageLimit: e.target.value })}
+                                    placeholder="Unlimited"
+                                    style={{ width: '100%', padding: '0.5rem' }}
+                                />
+                            </div>
+                            <button type="submit" disabled={loading} style={{ padding: '0.75rem', background: '#ff69b4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                {loading ? 'Creating...' : 'Create Code'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="table-container" style={{ background: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ textAlign: 'left', borderBottom: '2px solid #eee' }}>
+                                    <th style={{ padding: '1rem' }}>Code</th>
+                                    <th style={{ padding: '1rem' }}>Type</th>
+                                    <th style={{ padding: '1rem' }}>Value</th>
+                                    <th style={{ padding: '1rem' }}>Usage</th>
+                                    <th style={{ padding: '1rem' }}>Status</th>
+                                    <th style={{ padding: '1rem' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {discounts.map(discount => (
+                                    <tr key={discount.id} style={{ borderBottom: '1px solid #f9f9f9', opacity: discount.isActive ? 1 : 0.6 }}>
+                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{discount.code}</td>
+                                        <td style={{ padding: '1rem' }}>{discount.type}</td>
+                                        <td style={{ padding: '1rem' }}>{discount.type === 'PERCENTAGE' ? `${discount.value}%` : `₵${discount.value}`}</td>
+                                        <td style={{ padding: '1rem' }}>{discount.usedCount} / {discount.usageLimit || '∞'}</td>
+                                        <td style={{ padding: '1rem' }}>
+                                            <span style={{
+                                                padding: '0.25rem 0.5rem',
+                                                borderRadius: '4px',
+                                                fontSize: '0.75rem',
+                                                background: discount.isActive ? '#e8f5e9' : '#ffebee',
+                                                color: discount.isActive ? '#2e7d32' : '#c62828',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {discount.isActive ? 'ACTIVE' : 'INACTIVE'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                            <button onClick={() => handleToggleDiscount(discount.id)} style={{ padding: '0.4rem 0.75rem', background: '#ff9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                {discount.isActive ? 'Deactivate' : 'Activate'}
+                                            </button>
+                                            <button onClick={() => handleDeleteDiscount(discount.id)} style={{ padding: '0.4rem 0.75rem', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {discounts.length === 0 && (
+                                    <tr><td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No discount codes found</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             ) : (
                 <div className="orders-section">
                     <h2 style={{ marginBottom: '1.5rem' }}>Order Management</h2>

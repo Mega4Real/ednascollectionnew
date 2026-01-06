@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Helmet } from 'react-helmet-async';
 
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
@@ -33,6 +34,10 @@ const AdminLogin = () => {
             height: '100vh',
             flexDirection: 'column'
         }}>
+            <Helmet>
+                <title>Admin Login - Erdnas Collections</title>
+                <meta name="description" content="Secure admin login portal for Erdnas Collections management system." />
+            </Helmet>
             <h2>Admin Login</h2>
             <form onSubmit={handleSubmit} className="login-form" style={{
                 display: 'flex',
