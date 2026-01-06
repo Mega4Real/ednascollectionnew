@@ -249,6 +249,7 @@ const AdminDashboard = () => {
         code: '',
         type: 'PERCENTAGE',
         value: '',
+        minQuantity: '',
         usageLimit: '',
         expiresAt: ''
     });
@@ -275,6 +276,7 @@ const AdminDashboard = () => {
             await axios.post(`${apiUrl}/api/discounts`, {
                 ...discountForm,
                 value: parseFloat(discountForm.value),
+                minQuantity: discountForm.minQuantity ? parseInt(discountForm.minQuantity) : 1,
                 usageLimit: discountForm.usageLimit ? parseInt(discountForm.usageLimit) : null
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -513,6 +515,16 @@ const AdminDashboard = () => {
                                 />
                             </div>
                             <div>
+                                <label>Min Qty (Optional)</label>
+                                <input
+                                    type="number"
+                                    value={discountForm.minQuantity}
+                                    onChange={(e) => setDiscountForm({ ...discountForm, minQuantity: e.target.value })}
+                                    placeholder="1"
+                                    style={{ width: '100%', padding: '0.5rem' }}
+                                />
+                            </div>
+                            <div>
                                 <label>Usage Limit (Optional)</label>
                                 <input
                                     type="number"
@@ -535,6 +547,7 @@ const AdminDashboard = () => {
                                     <th style={{ padding: '1rem' }}>Code</th>
                                     <th style={{ padding: '1rem' }}>Type</th>
                                     <th style={{ padding: '1rem' }}>Value</th>
+                                    <th style={{ padding: '1rem' }}>Min Qty</th>
                                     <th style={{ padding: '1rem' }}>Usage</th>
                                     <th style={{ padding: '1rem' }}>Status</th>
                                     <th style={{ padding: '1rem' }}>Actions</th>
@@ -546,6 +559,7 @@ const AdminDashboard = () => {
                                         <td style={{ padding: '1rem', fontWeight: 'bold' }}>{discount.code}</td>
                                         <td style={{ padding: '1rem' }}>{discount.type}</td>
                                         <td style={{ padding: '1rem' }}>{discount.type === 'PERCENTAGE' ? `${discount.value}%` : `₵${discount.value}`}</td>
+                                        <td style={{ padding: '1rem' }}>{discount.minQuantity || 1}</td>
                                         <td style={{ padding: '1rem' }}>{discount.usedCount} / {discount.usageLimit || '∞'}</td>
                                         <td style={{ padding: '1rem' }}>
                                             <span style={{

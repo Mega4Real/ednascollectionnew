@@ -59,6 +59,7 @@ model DiscountCode {
   code        String   @unique
   type        String   // PERCENTAGE or FIXED
   value       Float
+  minQuantity Int      @default(1)
   usageLimit  Int?     // Null means unlimited
   usedCount   Int      @default(0)
   expiresAt   DateTime?

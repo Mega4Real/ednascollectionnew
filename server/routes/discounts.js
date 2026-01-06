@@ -21,7 +21,7 @@ router.get('/', auth, async (req, res) => {
 // Create a discount (Admin only)
 router.post('/', auth, async (req, res) => {
     try {
-        const { code, type, value, usageLimit, expiresAt } = req.body;
+        const { code, type, value, minQuantity, usageLimit, expiresAt } = req.body;
 
         // Basic validation
         if (!code || !type || !value) {
@@ -45,6 +45,7 @@ router.post('/', auth, async (req, res) => {
                 code: code.toUpperCase(),
                 type,
                 value: parseFloat(value),
+                minQuantity: minQuantity ? parseInt(minQuantity) : 1,
                 usageLimit: usageLimit ? parseInt(usageLimit) : null,
                 expiresAt: expiresAt ? new Date(expiresAt) : null
             }
@@ -60,7 +61,7 @@ router.post('/', auth, async (req, res) => {
 // Validate discount (Public)
 router.post('/validate', async (req, res) => {
     try {
-        const { code } = req.body;
+        const { code, itemCount } = req.body;
 
         if (!code) {
             return res.status(400).json({ message: 'Code is required' });
@@ -86,11 +87,19 @@ router.post('/validate', async (req, res) => {
             return res.status(400).json({ message: 'Discount code usage limit exceeded' });
         }
 
+        // Check Minimum Quantity
+        if (itemCount && discount.minQuantity > itemCount) {
+            return res.status(400).json({
+                message: `This code requires a minimum of ${discount.minQuantity} items.`
+            });
+        }
+
         res.json({
             valid: true,
             type: discount.type,
             value: discount.value,
-            code: discount.code
+            code: discount.code,
+            minQuantity: discount.minQuantity
         });
 
     } catch (error) {
