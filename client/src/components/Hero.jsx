@@ -4,6 +4,8 @@ import landingMobile from '/landing-mobile.webp';
 
 const Hero = forwardRef(({ onEnterShop }, ref) => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const [bannerMessage, setBannerMessage] = useState('');
+    const [bannerLoading, setBannerLoading] = useState(true);
 
     useEffect(() => {
         const handleResize = () => {
@@ -12,6 +14,38 @@ const Hero = forwardRef(({ onEnterShop }, ref) => {
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Fetch banner message from API
+    useEffect(() => {
+        const fetchBanner = async () => {
+            setBannerLoading(true);
+            try {
+                const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await fetch(`${API_URL}/api/settings/banner?_t=${Date.now()}`);
+                const data = await res.json();
+                if (data.message) {
+                    setBannerMessage(data.message);
+                }
+            } catch (error) {
+                console.log('Using default banner');
+            } finally {
+                setBannerLoading(false);
+            }
+        };
+
+        fetchBanner();
+
+        // Listen for banner updates from admin dashboard
+        const handleBannerUpdate = () => {
+            fetchBanner();
+        };
+
+        window.addEventListener('bannerUpdated', handleBannerUpdate);
+
+        return () => {
+            window.removeEventListener('bannerUpdated', handleBannerUpdate);
+        };
     }, []);
 
     const handleEnterShop = () => {
@@ -31,9 +65,11 @@ const Hero = forwardRef(({ onEnterShop }, ref) => {
             className="hero-section"
             style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.webp' : '/landing-bg.webp'})` }}
         >
+            {!bannerLoading && bannerMessage && (
                 <div className="hero-banner">
-                    <p>Welcome to Erdnas Collections | Free Delivery For 2 or More Dresses | Shop Now For Affordable Prices </p>
+                    <p>{bannerMessage}</p>
                 </div>
+            )}
             <div className="hero-overlay"></div>
 
             <div className="hero-content">

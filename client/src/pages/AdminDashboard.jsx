@@ -322,7 +322,69 @@ const AdminDashboard = () => {
         if (activeTab === 'discounts') {
             fetchDiscounts();
         }
+        if (activeTab === 'settings') {
+            fetchBanner();
+        }
     }, [activeTab]);
+
+    // Banner Management
+    const [bannerMessage, setBannerMessage] = useState('');
+    const [bannerLoading, setBannerLoading] = useState(false);
+
+    const fetchBanner = async () => {
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${apiUrl}/api/settings/banner`);
+            setBannerMessage(res.data.message || '');
+        } catch (error) {
+            console.error('Error fetching banner:', error);
+            setBannerMessage('');
+        }
+    };
+
+    const handleBannerSave = async () => {
+        if (!bannerMessage.trim()) {
+            alert('Banner message cannot be empty');
+            return;
+        }
+        
+        setBannerLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.put(
+                `${apiUrl}/api/settings/banner`,
+                { message: bannerMessage },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+            alert('Banner updated successfully!');
+            setBannerMessage(res.data.message);
+            // Notify other components that banner was updated
+            window.dispatchEvent(new CustomEvent('bannerUpdated'));
+        } catch (error) {
+            console.error('Error updating banner:', error);
+            alert('Error updating banner: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setBannerLoading(false);
+        }
+    };
+
+    const handleOrderDelete = async (orderId) => {
+        if (!window.confirm('Are you sure you want to delete this order?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.delete(`${apiUrl}/api/orders/${orderId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchOrders();
+        } catch (error) {
+            alert('Error deleting order');
+            console.error('Error deleting order:', error);
+        }
+    };
 
     return (
         <div className="admin-dashboard" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -374,6 +436,20 @@ const AdminDashboard = () => {
                         }}
                     >
                         Discounts
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('settings')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            background: activeTab === 'settings' ? '#ff69b4' : '#eee',
+                            color: activeTab === 'settings' ? 'white' : '#333',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Settings
                     </button>
                     <button onClick={handleLogout} style={{ padding: '0.5rem 1rem', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginLeft: '1rem' }}>
                         Logout
@@ -590,7 +666,7 @@ const AdminDashboard = () => {
                         </table>
                     </div>
                 </div>
-            ) : (
+            ) : activeTab === 'orders' ? (
                 <div className="orders-section">
                     <h2 style={{ marginBottom: '1.5rem' }}>Order Management</h2>
                     <div className="table-container" style={{ background: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
@@ -670,8 +746,53 @@ const AdminDashboard = () => {
                         </table>
                     </div>
                 </div>
-            )}
+            ) : activeTab === 'settings' ? (
+                <div className="settings-section">
+                    <div className="add-product-section" style={{ padding: '2rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+                        <h2>Scrolling Banner Message</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <p style={{ color: '#666', fontSize: '0.9rem' }}>
+                                This message scrolls horizontally at the top of the homepage.
+                            </p>
+                            <textarea
+                                value={bannerMessage}
+                                onChange={(e) => setBannerMessage(e.target.value)}
+                                style={{
+                                    width: '100%',
+                                    padding: '1rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ddd',
+                                    minHeight: '100px',
+                                    resize: 'vertical'
+                                }}
+                                placeholder="Enter banner message..."
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={handleBannerSave}
+                                    disabled={bannerLoading}
+                                    style={{
+                                        padding: '0.75rem 1.5rem',
+                                        background: '#28a745',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem'
+                                    }}
+                                >
+                                    {bannerLoading ? 'Saving...' : 'Save Settings'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
 
+            {/* Modal - only show if not in tabs view (covered by null above) or if overlay approach */}
             {selectedOrder && (
                 <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000 }}>
                     <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
