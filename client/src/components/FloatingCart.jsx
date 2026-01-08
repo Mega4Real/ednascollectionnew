@@ -724,7 +724,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                 </div>
                             </>
                         ) : (
-                            <div className="delivery-form-container">
+                            <div className="checkout-form-container">
                                 <form ref={formRef} className="delivery-form" onSubmit={(e) => e.preventDefault()}>
                                     <div className="form-group">
                                         <label>Full Name</label>

@@ -634,7 +634,7 @@ header h1:hover {
 }
 
 /* Checkout Form Styles */
-.delivery-form-container {
+.checkout-form-container {
     padding: 1.5rem;
     background: #fff;
     border-radius: 8px;
@@ -823,6 +823,7 @@ header h1:hover {
 
     .cart-summary-new {
         padding: 0.6rem 0.75rem;
+        margin-top: -0.5rem;
     }
 
     .total-line-new {
