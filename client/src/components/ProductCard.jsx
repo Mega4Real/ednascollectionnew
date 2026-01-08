@@ -14,6 +14,7 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
 
     const handleSizeClick = (e, size) => {
         e.stopPropagation();
+        if (product.isSold) return; // Prevent size selection if sold
 
         // Toggle behavior: if clicking the same size, deselect everything
         if (selectedSize === size) {
@@ -32,6 +33,8 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
     };
 
     const handleCardClick = () => {
+        if (product.isSold) return; // Prevent selection if sold
+
         if (isSelected) {
             onToggleSelect(product, null);
             setSelectedSize(null); // Reset size on deselect
@@ -57,11 +60,15 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
 
     return (
         <div
-            className={`dress-card ${isSelected ? 'selected' : ''}`}
+            className={`dress-card ${isSelected ? 'selected' : ''} ${product.isSold ? 'sold' : ''}`}
             onClick={handleCardClick}
             data-id={product.id}
+            style={{ position: 'relative' }}
         >
-            <div className="product-image-wrapper" style={{ position: 'relative' }}>
+            {product.isSold && (
+                <div className="sold-badge">SOLD</div>
+            )}
+            <div className="product-image-wrapper">
                 <img
                     src={getOptimizedImageUrl(product.imageUrl || product.image)}
                     alt={`Dress ${product.id}`}
@@ -69,9 +76,6 @@ const ProductCard = ({ product, isSelected, selectedSize: propSelectedSize, onTo
                     onClick={handleImageClick}
                     loading="lazy"
                 />
-                {product.isSold && (
-                    <div className="sold-badge">SOLD</div>
-                )}
             </div>
             <div className="dress-info">
                 <div className="dress-price">₵{product.price.toFixed(2)}</div>

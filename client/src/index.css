@@ -875,12 +875,14 @@ header h1:hover {
         padding: 1rem;
         font-size: 0.95rem;
         margin-bottom: 0.75rem;
-        min-height: 48px; /* Touch-friendly */
+        min-height: 48px;
+        /* Touch-friendly */
     }
 
     .continue-shopping {
         padding: 0.75rem;
-        min-height: 44px; /* Touch-friendly */
+        min-height: 44px;
+        /* Touch-friendly */
         font-size: 0.9rem;
     }
 
@@ -899,8 +901,10 @@ header h1:hover {
 
     .form-group input {
         padding: 0.875rem;
-        font-size: 1rem; /* Prevent zoom on iOS */
-        min-height: 48px; /* Touch-friendly */
+        font-size: 1rem;
+        /* Prevent zoom on iOS */
+        min-height: 48px;
+        /* Touch-friendly */
         border-radius: 10px;
     }
 
@@ -1222,10 +1226,11 @@ header h1:hover {
 
 .dress-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 180px));
     gap: 0.5rem;
     max-width: 1400px;
     padding: 1rem 0.5rem;
+    justify-content: center;
 }
 
 .pagination {
@@ -1427,7 +1432,8 @@ header h1:hover {
     background-attachment: scroll;
     margin-top: -8rem;
     overflow: hidden;
-    background-image: url('/landing-bg.webp'); /* Default desktop image */
+    background-image: url('/landing-bg.webp');
+    /* Default desktop image */
 }
 
 .hero-banner {
@@ -1459,6 +1465,7 @@ header h1:hover {
     0% {
         transform: translateX(100%);
     }
+
     100% {
         transform: translateX(-100%);
     }
@@ -1587,8 +1594,13 @@ header h1:hover {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Responsive Hero Section */
@@ -1616,12 +1628,14 @@ header h1:hover {
     }
 
     .hero-overlay {
-        background: rgba(0, 0, 0, 0.1); /* Even more transparent overlay for mobile */
+        background: rgba(0, 0, 0, 0.1);
+        /* Even more transparent overlay for mobile */
     }
 
     .hero-content {
         padding: 2rem 1rem;
-        transform: translateY(-10rem); /* Move content up more to avoid covering face */
+        transform: translateY(-10rem);
+        /* Move content up more to avoid covering face */
     }
 
     .hero-title {
@@ -1640,7 +1654,8 @@ header h1:hover {
         padding: 0.8rem 2.5rem;
         font-size: 1.1rem;
         letter-spacing: 1px;
-        transform: translateY(8rem); /* Move button down a bit more */
+        transform: translateY(8rem);
+        /* Move button down a bit more */
     }
 }
 
@@ -1753,17 +1768,32 @@ header h1:hover {
 
 .sold-badge {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background-color: #f44336;
+    top: 8px;
+    right: 8px;
+    background-color: #d32f2f;
     color: white;
-    padding: 0.2rem 0.3rem;
-    border-radius: 10px;
-    font-size: 0.6rem;
-    font-weight: 800;
-    text-transform: uppercase;
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    border-radius: 4px;
     z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     pointer-events: none;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 1 !important;
+}
+
+.dress-card.sold {
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.dress-card.sold .product-image-wrapper,
+.dress-card.sold .dress-info {
+    opacity: 0.5;
+}
+
+.dress-card.sold .size-option {
+    text-decoration: line-through;
 }
