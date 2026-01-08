@@ -347,7 +347,7 @@ const AdminDashboard = () => {
             alert('Banner message cannot be empty');
             return;
         }
-        
+
         setBannerLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -392,66 +392,37 @@ const AdminDashboard = () => {
                 <title>Admin Dashboard - Erdnas Collections</title>
                 <meta name="description" content="Admin dashboard for managing Erdnas Collections products, orders, and inventory." />
             </Helmet>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div className="admin-header">
                 <h1>Admin Dashboard</h1>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="admin-nav">
                     <button
                         onClick={() => setActiveTab('products')}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            background: activeTab === 'products' ? '#ff69b4' : '#eee',
-                            color: activeTab === 'products' ? 'white' : '#333',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold'
-                        }}
+                        className={`admin-nav-btn ${activeTab === 'products' ? 'active' : ''}`}
                     >
                         Products
                     </button>
                     <button
                         onClick={() => setActiveTab('orders')}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            background: activeTab === 'orders' ? '#ff69b4' : '#eee',
-                            color: activeTab === 'orders' ? 'white' : '#333',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold'
-                        }}
+                        className={`admin-nav-btn ${activeTab === 'orders' ? 'active' : ''}`}
                     >
                         Orders ({orders.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('discounts')}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            background: activeTab === 'discounts' ? '#ff69b4' : '#eee',
-                            color: activeTab === 'discounts' ? 'white' : '#333',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold'
-                        }}
+                        className={`admin-nav-btn ${activeTab === 'discounts' ? 'active' : ''}`}
                     >
                         Discounts
                     </button>
                     <button
                         onClick={() => setActiveTab('settings')}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            background: activeTab === 'settings' ? '#ff69b4' : '#eee',
-                            color: activeTab === 'settings' ? 'white' : '#333',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: 'bold'
-                        }}
+                        className={`admin-nav-btn ${activeTab === 'settings' ? 'active' : ''}`}
                     >
                         Settings
                     </button>
-                    <button onClick={handleLogout} style={{ padding: '0.5rem 1rem', background: '#333', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginLeft: '1rem' }}>
+                    <button
+                        onClick={handleLogout}
+                        className="admin-logout-btn"
+                    >
                         Logout
                     </button>
                 </div>

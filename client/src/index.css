@@ -1621,7 +1621,22 @@ header h1:hover {
     }
 }
 
+@keyframes slideTextMobile {
+    0% {
+        transform: translateX(100vw);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
 @media (max-width: 768px) {
+    .hero-banner p {
+        animation-name: slideTextMobile;
+        animation-delay: -5s;
+    }
+
     .hero-section {
         min-height: 100svh;
         margin-top: -3.5rem;
@@ -1796,4 +1811,74 @@ header h1:hover {
 
 .dress-card.sold .size-option {
     text-decoration: line-through;
+}
+
+/* Admin Dashboard Styles */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.admin-nav-btn {
+    padding: 0.5rem 1rem;
+    background: #eee;
+    color: #333;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.admin-nav-btn.active {
+    background: #ff69b4;
+    color: white;
+}
+
+.admin-logout-btn {
+    padding: 0.5rem 1rem;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 1rem;
+}
+
+@media (max-width: 768px) {
+    .admin-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        position: relative;
+    }
+
+    .admin-nav {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .admin-logout-btn {
+        margin-left: 0;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: auto;
+        padding: 0.5rem 1rem;
+    }
+
+    .admin-nav-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        text-align: center;
+    }
 }
