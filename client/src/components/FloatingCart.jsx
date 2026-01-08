@@ -783,7 +783,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                     </div>
                                 </form>
 
-                                <div className="discount-form" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                                <div className="discount-form" style={{ marginTop: '2.5rem', marginBottom: '1rem' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <input
                                             type="text"
@@ -795,7 +795,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                                 flex: 1,
                                                 padding: '0.75rem',
                                                 border: '1px solid #ddd',
-                                                borderRadius: '4px',
+                                                borderRadius: '6px',
                                                 fontSize: '0.9rem'
                                             }}
                                         />
@@ -807,7 +807,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                                 background: appliedDiscount ? '#2e7d32' : '#333',
                                                 color: 'white',
                                                 border: 'none',
-                                                borderRadius: '4px',
+                                                borderRadius: '6px',
                                                 cursor: (!!appliedDiscount || !discountCode) ? 'default' : 'pointer',
                                                 fontWeight: 'bold',
                                                 fontSize: '0.9rem'

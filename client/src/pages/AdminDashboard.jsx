@@ -417,7 +417,7 @@ const AdminDashboard = () => {
                         onClick={() => setActiveTab('settings')}
                         className={`admin-nav-btn ${activeTab === 'settings' ? 'active' : ''}`}
                     >
-                        Settings
+                        Banner
                     </button>
                     <button
                         onClick={handleLogout}
