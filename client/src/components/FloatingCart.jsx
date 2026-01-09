@@ -307,10 +307,19 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart, hideOnHero }) 
             paymentMethod: 'PAYSTACK'
         });
 
-        // 2. Then clear the items
+        // 2. Then clear the items and form
         if (typeof onClearCart === 'function') {
             onClearCart();
         }
+        setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            address: '',
+            city: ''
+        });
+        setDiscountCode('');
+        setAppliedDiscount(null);
 
         // 3. Then do background tasks
         if (orderId) {
@@ -496,8 +505,17 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart, hideOnHero }) 
                 });
             }
 
-            // Clear cart
+            // Clear cart and form
             if (onClearCart) onClearCart();
+            setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                address: '',
+                city: ''
+            });
+            setDiscountCode('');
+            setAppliedDiscount(null);
 
             // Redirect to WhatsApp - Try opening in a new tab first
             // 2. Detect device
@@ -563,6 +581,14 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart, hideOnHero }) 
         };
     }, [isOpen]);
 
+    // Auto-remove discount if requirements are no longer met
+    useEffect(() => {
+        if (appliedDiscount && appliedDiscount.minQuantity && selectedItems.length < appliedDiscount.minQuantity) {
+            setAppliedDiscount(null);
+            setDiscountError(`Code removed: min. ${appliedDiscount.minQuantity} items required.`);
+        }
+    }, [selectedItems.length, appliedDiscount]);
+
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
@@ -581,12 +607,12 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart, hideOnHero }) 
         };
     }, []);
 
-    // Close cart when the last item is removed
+    // Close cart when the last item is removed (only if not showing success)
     useEffect(() => {
-        if (selectedItems.length === 0 && isOpen) {
+        if (selectedItems.length === 0 && isOpen && !successOrder) {
             setIsOpen(false);
         }
-    }, [selectedItems.length, isOpen]);
+    }, [selectedItems.length, isOpen, successOrder]);
 
     // ONLY return null if the cart is COMPLETELY empty AND not open AND not showing success
     if (selectedItems.length === 0 && !successOrder && !isOpen) {
