@@ -762,7 +762,7 @@ header h1:hover {
     .form-group select,
     .form-group textarea {
         padding: 0.65rem;
-        font-size: 0.95rem;
+        font-size: 16px;
     }
 }
 
@@ -822,7 +822,7 @@ header h1:hover {
     .form-group select,
     .form-group textarea {
         padding: 0.65rem;
-        font-size: 0.9rem;
+        font-size: 16px;
     }
 
     .form-row {
@@ -882,7 +882,7 @@ header h1:hover {
     .form-group select,
     .form-group textarea {
         padding: 0.6rem;
-        font-size: 0.85rem;
+        font-size: 16px;
     }
 
     .form-row {
@@ -932,7 +932,7 @@ header h1:hover {
     .form-group select,
     .form-group textarea {
         padding: 0.5rem;
-        font-size: 0.8rem;
+        font-size: 16px;
     }
 
     .form-row {
@@ -1496,7 +1496,7 @@ header h1:hover {
 @media (max-width: 768px) {
     .hero-banner p {
         animation-name: slideTextMobile;
-        animation-delay: -5s;
+        animation-delay: -1s;
     }
 
     .hero-section {

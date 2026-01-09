@@ -343,6 +343,7 @@ const Home = () => {
                 selectedItems={selectedItems}
                 onRemoveItem={handleRemoveItem}
                 onClearCart={handleClearCart}
+                hideOnHero={showHero}
             />
 
             <Footer />

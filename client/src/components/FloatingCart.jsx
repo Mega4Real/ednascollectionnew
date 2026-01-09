@@ -143,7 +143,7 @@ const ReceiptTemplate = ({ orderId, items, total, customer, paymentMethod }) => 
     </div>
 );
 
-const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
+const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart, hideOnHero }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
     const [step, setStep] = useState('cart'); // 'cart' or 'checkout'
@@ -595,8 +595,8 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
 
     return (
         <div className="floating-cart-wrapper">
-            {/* Round Toggle Button (FAB) - Only show if items are selected, cart is closed, and not near footer */}
-            {selectedItems.length > 0 && !isOpen && isVisible && (
+            {/* Round Toggle Button (FAB) - Only show if items selected, cart closed, not on hero, and not near footer */}
+            {selectedItems.length > 0 && !isOpen && isVisible && !hideOnHero && (
                 <button
                     className="cart-fab"
                     onClick={() => setIsOpen(true)}
@@ -799,7 +799,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                                 padding: '0.75rem',
                                                 border: '1px solid #ddd',
                                                 borderRadius: '6px',
-                                                fontSize: '0.9rem'
+                                                fontSize: '16px'
                                             }}
                                         />
                                         <button
@@ -813,7 +813,7 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
                                                 borderRadius: '6px',
                                                 cursor: (!!appliedDiscount || !discountCode) ? 'default' : 'pointer',
                                                 fontWeight: 'bold',
-                                                fontSize: '0.9rem'
+                                                fontSize: '16px'
                                             }}
                                         >
                                             {isVerifyingDiscount ? '...' : appliedDiscount ? '✓' : 'Apply'}
