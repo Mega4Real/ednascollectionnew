@@ -549,14 +549,17 @@ const FloatingCart = ({ selectedItems, onRemoveItem, onClearCart }) => {
     // Lock body scroll when cart is open
     useEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
+            document.documentElement.classList.add('no-scroll');
+            document.body.classList.add('no-scroll');
         } else {
-            document.body.style.overflow = 'unset';
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
         }
 
         // Cleanup on unmount
         return () => {
-            document.body.style.overflow = 'unset';
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
         };
     }, [isOpen]);
 

@@ -12,6 +12,14 @@ html {
     height: -webkit-fill-available;
 }
 
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden !important;
+    height: 100dvh !important;
+    position: fixed;
+    width: 100%;
+}
+
 /* CSS Variables for Theming */
 :root {
     --bg-main: #f4f4f4;
@@ -318,6 +326,7 @@ header h1:hover {
     display: flex;
     justify-content: flex-end;
     align-items: stretch;
+    touch-action: none;
 }
 
 .cart-popup-new {
@@ -329,6 +338,7 @@ header h1:hover {
     display: flex;
     flex-direction: column;
     animation: slideInRightCart 0.3s ease-out;
+    touch-action: auto;
 }
 
 @keyframes slideInRightCart {
