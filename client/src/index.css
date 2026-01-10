@@ -1309,7 +1309,7 @@ header h1:hover {
     z-index: 1001;
     overflow: hidden;
     white-space: nowrap;
-    height: auto;
+    height: 1.3rem;
     line-height: 1;
 }
 

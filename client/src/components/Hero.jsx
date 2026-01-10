@@ -65,11 +65,11 @@ const Hero = forwardRef(({ onEnterShop }, ref) => {
             className="hero-section"
             style={{ backgroundImage: `url(${isMobile ? '/landing-mobile.webp' : '/landing-bg.webp'})` }}
         >
-            {!bannerLoading && bannerMessage && (
-                <div className="hero-banner">
+            <div className="hero-banner">
+                {!bannerLoading && bannerMessage && (
                     <p>{bannerMessage}</p>
-                </div>
-            )}
+                )}
+            </div>
             <div className="hero-overlay"></div>
 
             <div className="hero-content">
