@@ -6,6 +6,7 @@ const auth = require('../middleware/auth');
 // Public routes
 router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
+router.get('/events', productController.subscribeToProducts);
 
 // Protected routes (admin only)
 router.post('/', auth, productController.createProduct);

@@ -2,14 +2,45 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+// Manage active SSE clients
+const MAX_CLIENTS = 1000;
+const clients = new Set();
+
+exports.subscribeToProducts = (req, res) => {
+    if (clients.size >= MAX_CLIENTS) {
+        return res.status(503).json({ error: 'Too many connections' });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    // Send heartbeat every 30s to keep connection alive
+    const heartbeat = setInterval(() => {
+        res.write(': heartbeat\n\n');
+    }, 30000);
+
+    clients.add(res);
+
+    req.on('close', () => {
+        clearInterval(heartbeat);
+        clients.delete(res);
+    });
+};
+
+const notifyProductUpdate = () => {
+    clients.forEach(res => res.write('data: refresh\n\n'));
+};
+
 exports.getAllProducts = async (req, res) => {
     try {
         const products = await prisma.product.findMany({
             orderBy: { position: 'asc' }
         });
 
-        // Cache for 1 minute (60 seconds) with must-revalidate
-        res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+        // Cache for 1 minute
+        res.set('Cache-Control', 'public, max-age=60');
         res.json(products);
     } catch (error) {
         console.error(error);
@@ -58,6 +89,7 @@ exports.createProduct = async (req, res) => {
             data: productData
         });
 
+        notifyProductUpdate();
         res.status(201).json(product);
     } catch (error) {
         console.error(error);
@@ -81,6 +113,7 @@ exports.updateProduct = async (req, res) => {
             }
         });
 
+        notifyProductUpdate();
         res.json(product);
     } catch (error) {
         console.error(error);
@@ -95,6 +128,7 @@ exports.deleteProduct = async (req, res) => {
             where: { id: parseInt(id) }
         });
 
+        notifyProductUpdate();
         res.json({ message: 'Product deleted' });
     } catch (error) {
         console.error(error);
@@ -116,6 +150,7 @@ exports.reorderProducts = async (req, res) => {
             )
         );
 
+        notifyProductUpdate();
         res.json({ message: 'Products reordered successfully' });
     } catch (error) {
         console.error(error);

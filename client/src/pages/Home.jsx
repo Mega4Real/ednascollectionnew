@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
@@ -29,63 +28,60 @@ const Home = () => {
         localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
     }, [selectedItems]);
 
-    // Fetch products from API with caching
+    // Fetch products from API
+    const fetchProducts = useCallback(async (cacheBust = false) => {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const url = cacheBust
+            ? `${apiUrl}/api/products?v=${Date.now()}`
+            : `${apiUrl}/api/products`;
+
+        try {
+            setLoading(true);
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // Sort by position if available, otherwise by ID
+            const sortedProducts = (data || []).sort((a, b) => {
+                if (a.position !== undefined && b.position !== undefined) {
+                    return a.position - b.position;
+                }
+                return a.id - b.id;
+            });
+
+            setProducts(sortedProducts);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
-        const fetchProducts = async () => {
-            const CACHE_KEY = 'cachedProducts';
-            const CACHE_DURATION = 60 * 1000; // 1 minute
+        fetchProducts();
+    }, [fetchProducts]);
 
-            try {
-                setLoading(true);
+    // Real-time updates via SSE
+    useEffect(() => {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const eventSource = new EventSource(`${apiUrl}/api/products/events`);
 
-                // Check cache first
-                const cachedData = localStorage.getItem(CACHE_KEY);
-                if (cachedData) {
-                    const { products, timestamp } = JSON.parse(cachedData);
-                    const now = new Date().getTime();
+        eventSource.onmessage = () => {
+            fetchProducts(true); // Bypass cache with timestamp
+        };
 
-                    if (now - timestamp < CACHE_DURATION) {
-                        setProducts(products);
-                        setLoading(false);
-                        return;
-                    }
-                }
-
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-                const res = await axios.get(`${apiUrl}/api/products`);
-
-                // Sort by position if available, otherwise by ID
-                const sortedProducts = (res.data || []).sort((a, b) => {
-                    if (a.position !== undefined && b.position !== undefined) {
-                        return a.position - b.position;
-                    }
-                    return a.id - b.id;
-                });
-
-                setProducts(sortedProducts);
-
-                // Update cache
-                localStorage.setItem(CACHE_KEY, JSON.stringify({
-                    products: sortedProducts,
-                    timestamp: new Date().getTime()
-                }));
-
-            } catch (error) {
-                console.error('Error fetching products:', error);
-                // Try to use stale cache if network fails
-                const cachedData = localStorage.getItem(CACHE_KEY);
-                if (cachedData) {
-                    const { products } = JSON.parse(cachedData);
-                    setProducts(products);
-                } else {
-                    setProducts([]);
-                }
-            } finally {
-                setLoading(false);
+        // Visibility refresh fallback
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchProducts(true);
             }
         };
-        fetchProducts();
-    }, []);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            eventSource.close();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [fetchProducts]);
 
     // Filter products
     const filteredProducts = useMemo(() => {
