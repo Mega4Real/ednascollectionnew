@@ -2,6 +2,121 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const EditIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+    </svg>
+);
+
+const DeleteIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        <line x1="10" y1="11" x2="10" y2="17"></line>
+        <line x1="14" y1="11" x2="14" y2="17"></line>
+    </svg>
+);
+
+const SoldIcon = ({ isSold }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isSold ? "#dc2626" : "#059669"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+    </svg>
+);
+
+const PowerIcon = ({ isActive }) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isActive ? "#dc2626" : "#059669"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block' }}>
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+        <line x1="12" y1="2" x2="12" y2="12"></line>
+    </svg>
+);
+
+const SortableItem = ({ product, index, handleEdit, handleToggleSold, handleDelete }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: product.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        borderBottom: '1px solid #eee',
+        background: isDragging ? '#fcfcfc' : 'white',
+        zIndex: isDragging ? 2 : 1,
+        position: 'relative',
+    };
+
+    return (
+        <tr ref={setNodeRef} style={style}>
+            <td style={{ padding: '1rem' }}>
+                <div
+                    {...attributes}
+                    {...listeners}
+                    style={{ cursor: 'grab', padding: '0.5rem', display: 'inline-block' }}
+                    title="Drag to reorder"
+                >
+                    ⣿
+                </div>
+            </td>
+            <td style={{ padding: '1rem' }}>{product.id}</td>
+            <td style={{ padding: '1rem' }}>
+                <div style={{ position: 'relative', width: '50px', height: '50px' }}>
+                    <img src={product.imageUrl || product.image} alt="" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
+                    {product.isSold && (
+                        <span style={{ position: 'absolute', top: 0, left: 0, background: 'red', color: 'white', fontSize: '0.6rem', padding: '2px', fontWeight: 'bold' }}>SOLD</span>
+                    )}
+                </div>
+            </td>
+            <td style={{ padding: '1rem' }}>₵{product.price.toFixed(2)}</td>
+            <td style={{ padding: '1rem' }}>{product.sizes.join(', ')}</td>
+            <td style={{ padding: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <button
+                    onClick={() => handleEdit(product)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Edit Product"
+                >
+                    <EditIcon />
+                </button>
+                <button
+                    onClick={() => handleToggleSold(product)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title={product.isSold ? "Mark as Available" : "Mark as Sold"}
+                >
+                    <SoldIcon isSold={product.isSold} />
+                </button>
+                <button
+                    onClick={() => handleDelete(product.id)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Delete Product"
+                >
+                    <DeleteIcon />
+                </button>
+            </td>
+        </tr>
+    );
+};
 
 const AdminDashboard = () => {
     const [products, setProducts] = useState([]);
@@ -182,31 +297,40 @@ const AdminDashboard = () => {
         setFormData({ imageUrl: '', videoUrl: '', price: '', sizes: [], isSold: false });
     };
 
-    const handleMove = async (index, direction) => {
-        const newProducts = [...products];
-        if (direction === 'up' && index > 0) {
-            [newProducts[index], newProducts[index - 1]] = [newProducts[index - 1], newProducts[index]];
-        } else if (direction === 'down' && index < newProducts.length - 1) {
-            [newProducts[index], newProducts[index + 1]] = [newProducts[index + 1], newProducts[index]];
-        } else {
-            return;
-        }
-        setProducts(newProducts);
-        const reorderedPayload = newProducts.map((product, idx) => ({
-            id: product.id,
-            position: idx
-        }));
-        try {
-            const token = localStorage.getItem('token');
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            await axios.put(`${apiUrl}/api/products/reorder`, { products: reorderedPayload }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            clearProductCache();
-        } catch (error) {
-            console.error('Error saving order', error);
-            alert('Failed to save new order');
-            fetchProducts();
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = async (event) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = products.findIndex((p) => p.id === active.id);
+            const newIndex = products.findIndex((p) => p.id === over.id);
+
+            const newProducts = arrayMove(products, oldIndex, newIndex);
+            setProducts(newProducts);
+
+            const reorderedPayload = newProducts.map((product, idx) => ({
+                id: product.id,
+                position: idx
+            }));
+
+            try {
+                const token = localStorage.getItem('token');
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                await axios.put(`${apiUrl}/api/products/reorder`, { products: reorderedPayload }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                clearProductCache();
+            } catch (error) {
+                console.error('Error saving order', error);
+                alert('Failed to save new order');
+                fetchProducts();
+            }
         }
     };
 
@@ -485,41 +609,41 @@ const AdminDashboard = () => {
                             Product List ({products.length}) | Total Price: ₵{products.reduce((sum, product) => sum + product.price, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </h2>
                         <div className="table-container">
-                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ textAlign: 'left' }}>
-                                        <th style={{ padding: '1rem' }}>ID</th>
-                                        <th style={{ padding: '1rem' }}>Image</th>
-                                        <th style={{ padding: '1rem' }}>Price</th>
-                                        <th style={{ padding: '1rem' }}>Sizes</th>
-                                        <th style={{ padding: '1rem' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {products.map((product, index) => (
-                                        <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '1rem' }}>{product.id}</td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <div style={{ position: 'relative', width: '50px', height: '50px' }}>
-                                                    <img src={product.imageUrl || product.image} alt="" style={{ width: '50px', height: '50px', objectFit: 'cover' }} />
-                                                    {product.isSold && (
-                                                        <span style={{ position: 'absolute', top: 0, left: 0, background: 'red', color: 'white', fontSize: '0.6rem', padding: '2px', fontWeight: 'bold' }}>SOLD</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: '1rem' }}>₵{product.price.toFixed(2)}</td>
-                                            <td style={{ padding: '1rem' }}>{product.sizes.join(', ')}</td>
-                                            <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                                <button onClick={() => handleMove(index, 'up')} disabled={index === 0} style={{ padding: '0.25rem 0.5rem', background: '#666', color: 'white', border: 'none', borderRadius: '4px', cursor: index === 0 ? 'not-allowed' : 'pointer', opacity: index === 0 ? 0.5 : 1 }}>↑</button>
-                                                <button onClick={() => handleMove(index, 'down')} disabled={index === products.length - 1} style={{ padding: '0.25rem 0.5rem', background: '#666', color: 'white', border: 'none', borderRadius: '4px', cursor: index === products.length - 1 ? 'not-allowed' : 'pointer', opacity: index === products.length - 1 ? 0.5 : 1 }}>↓</button>
-                                                <button onClick={() => handleEdit(product)} style={{ padding: '0.25rem 0.5rem', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Edit</button>
-                                                <button onClick={() => handleToggleSold(product)} style={{ padding: '0.25rem 0.5rem', background: product.isSold ? '#f44336' : '#ff9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>{product.isSold ? 'Sold' : 'Mark Sold'}</button>
-                                                <button onClick={() => handleDelete(product.id)} style={{ padding: '0.25rem 0.5rem', background: 'red', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Delete</button>
-                                            </td>
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ textAlign: 'left' }}>
+                                            <th style={{ padding: '1rem', width: '40px' }}></th>
+                                            <th style={{ padding: '1rem' }}>ID</th>
+                                            <th style={{ padding: '1rem' }}>Image</th>
+                                            <th style={{ padding: '1rem' }}>Price</th>
+                                            <th style={{ padding: '1rem' }}>Sizes</th>
+                                            <th style={{ padding: '1rem' }}>Actions</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        <SortableContext
+                                            items={products.map(p => p.id)}
+                                            strategy={verticalListSortingStrategy}
+                                        >
+                                            {products.map((product, index) => (
+                                                <SortableItem
+                                                    key={product.id}
+                                                    product={product}
+                                                    index={index}
+                                                    handleEdit={handleEdit}
+                                                    handleToggleSold={handleToggleSold}
+                                                    handleDelete={handleDelete}
+                                                />
+                                            ))}
+                                        </SortableContext>
+                                    </tbody>
+                                </table>
+                            </DndContext>
                         </div>
                     </div>
                 </>
@@ -621,11 +745,19 @@ const AdminDashboard = () => {
                                             </span>
                                         </td>
                                         <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                            <button onClick={() => handleToggleDiscount(discount.id)} style={{ padding: '0.4rem 0.75rem', background: '#ff9800', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                {discount.isActive ? 'Deactivate' : 'Activate'}
+                                            <button
+                                                onClick={() => handleToggleDiscount(discount.id)}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                title={discount.isActive ? "Deactivate" : "Activate"}
+                                            >
+                                                <PowerIcon isActive={discount.isActive} />
                                             </button>
-                                            <button onClick={() => handleDeleteDiscount(discount.id)} style={{ padding: '0.4rem 0.75rem', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                                Delete
+                                            <button
+                                                onClick={() => handleDeleteDiscount(discount.id)}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                title="Delete Discount"
+                                            >
+                                                <DeleteIcon />
                                             </button>
                                         </td>
                                     </tr>
@@ -703,9 +835,10 @@ const AdminDashboard = () => {
                                             </select>
                                             <button
                                                 onClick={() => handleOrderDelete(order.id)}
-                                                style={{ padding: '0.4rem 0.75rem', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                title="Delete Order"
                                             >
-                                                Delete
+                                                <DeleteIcon />
                                             </button>
                                         </td>
                                     </tr>
