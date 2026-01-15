@@ -15,16 +15,20 @@ exports.sendOrderReceipt = async (order) => {
     const itemsList = order.items.map(item =>
         `<tr>
             <td style="padding: 10px 0; border-bottom: 1px solid #f9f9f9;">
-                <img src="${item.product && item.product.imageUrl ? item.product.imageUrl : ''}" alt="Product" style="width: 50px; height: 60px; border-radius: 4px; object-fit: cover; text-decoration: none; display: block;" />
+                <img 
+                    src="${item.product && item.product.imageUrl ? item.product.imageUrl : 'https://erdnascollections.com/android-chrome-192x192.png'}" 
+                    alt="${item.product ? item.product.name : 'Product'}" 
+                    style="width: 50px; height: 60px; border-radius: 4px; object-fit: cover; display: block;" 
+                />
             </td>
             <td style="padding: 10px; border-bottom: 1px solid #f9f9f9;">
-                <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+                <p style="margin: 0; font-size: 12px; color: #666;">
                     Size: ${item.size}
                 </p>
             </td>
             <td style="padding: 10px 0; border-bottom: 1px solid #f9f9f9; text-align: right; white-space: nowrap;">
                 <p style="margin: 0; font-weight: bold; font-size: 14px; color: #333;">
-                    GH₵${item.price.toLocaleString()}
+                    GH₵${Number(item.price || 0).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
             </td>
         </tr>`
@@ -32,56 +36,151 @@ exports.sendOrderReceipt = async (order) => {
 
     const emailHtml = `
         <!DOCTYPE html>
-        <html>
+        <html lang="en">
         <head>
             <meta charset="utf-8">
-            <title>Order Receipt</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Order Receipt - Erdnas Collections</title>
+            <style>
+                @font-face {
+                    font-family: 'Amsterdam One';
+                    src: url('https://erdnascollections.com/fonts/AmsterdamOne-eZ12l.ttf') format('truetype');
+                    font-weight: normal;
+                    font-style: normal;
+                }
+            </style>
         </head>
-        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #ffffff;">
-            <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff;">
-                
-                <!-- ENTITY HEADER -->
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0; letter-spacing: 2px; font-family: 'Brush Script MT', cursive; color: #ff69b4; fontSize: 28px; font-weight: normal;">
-                        Erdnas Collections
-                    </h2>
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        Order Receipt #${order.paymentReference || order.id}
-                    </p>
-                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
-                        <strong>Payment:</strong> ${order.paymentMethod === 'WHATSAPP' ? 'WhatsApp / Manual' : 'Online (Paystack)'}
-                    </p>
-                </div>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 20px 0;">
+                <tr>
+                    <td align="center">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            
+                            <!-- HEADER WITH LOGO/BRAND -->
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%); padding: 30px 20px; text-align: center;">
+                                    <h1 style="margin: 0; letter-spacing: 3px; font-family: 'Amsterdam One', cursive; color: #ffffff; font-size: 32px; font-weight: normal; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">
+                                        Erdnas Collections
+                                    </h1>
+                                    <p style="margin: 10px 0 0 0; font-size: 14px; color: #ffffff; opacity: 0.9;">
+                                        ✨ Your Authentic Dress Plug ✨
+                                    </p>
+                                </td>
+                            </tr>
 
-                <!-- CUSTOMER DETAILS -->
-                <div style="margin-bottom: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px; font-size: 14px; color: #333;">
-                    <p style="margin: 0 0 5px 0;"><strong>Customer:</strong> ${order.customerName}</p>
-                    <p style="margin: 0 0 5px 0;"><strong>Phone:</strong> ${order.phone}</p>
-                    <p style="margin: 0;"><strong>Address:</strong> ${order.address}, ${order.city}</p>
-                </div>
+                            <!-- ORDER CONFIRMATION MESSAGE -->
+                            <tr>
+                                <td style="padding: 30px 20px 20px 20px; text-align: center;">
+                                    <h2 style="margin: 0 0 10px 0; font-size: 24px; color: #333;">
+                                        Thank You for Your Order! 🎉
+                                    </h2>
+                                    <p style="margin: 0; font-size: 14px; color: #666; line-height: 1.6;">
+                                        We've received your order and will process it shortly.
+                                    </p>
+                                </td>
+                            </tr>
 
-                <!-- ITEMS HEADER -->
-                <div style="border-top: 1px solid #eee; padding-top: 15px;">
-                    <h4 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">Items</h4>
-                    
-                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                        ${itemsList}
-                    </table>
-                </div>
+                            <!-- ORDER DETAILS -->
+                            <tr>
+                                <td style="padding: 0 20px 20px 20px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9f9f9; border-radius: 8px; padding: 15px;">
+                                        <tr>
+                                            <td style="padding: 5px 0;">
+                                                <p style="margin: 0; font-size: 13px; color: #666;">
+                                                    <strong style="color: #333;">Order Number:</strong> #${order.paymentReference || order.id}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 5px 0;">
+                                                <p style="margin: 0; font-size: 13px; color: #666;">
+                                                    <strong style="color: #333;">Payment Method:</strong> ${order.paymentMethod === 'WHATSAPP' ? 'WhatsApp / Manual' : 'Online (Paystack)'}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 5px 0;">
+                                                <p style="margin: 0; font-size: 13px; color: #666;">
+                                                    <strong style="color: #333;">Order Date:</strong> ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
 
-                <!-- TOTAL -->
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #333; display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="margin: 0; font-size: 18px; color: #333; float: left;">Total: </h3>
-                    <h3 style="margin: 0; font-size: 18px; color: #333; float: right;">GH₵${order.totalAmount.toLocaleString()}</h3>
-                    <div style="clear: both;"></div>
-                </div>
+                            <!-- CUSTOMER DETAILS -->
+                            <tr>
+                                <td style="padding: 0 20px 20px 20px;">
+                                    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">Delivery Information</h3>
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9f9f9; border-radius: 8px; padding: 15px;">
+                                        <tr>
+                                            <td>
+                                                <p style="margin: 0 0 5px 0; font-size: 14px; color: #333;">
+                                                    <strong>${order.customerName}</strong>
+                                                </p>
+                                                <p style="margin: 0 0 5px 0; font-size: 13px; color: #666;">
+                                                    📞 ${order.phone}
+                                                </p>
+                                                <p style="margin: 0; font-size: 13px; color: #666;">
+                                                    📍 ${order.address}, ${order.city}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
 
-                <!-- FOOTER -->
-                <p style="font-size: 10px; margin-top: 20px; text-align: center; color: #999; text-transform: uppercase;">
-                    Thank you for shopping with Erdnas Collections
-                </p>
+                            <!-- ITEMS ORDERED -->
+                            <tr>
+                                <td style="padding: 0 20px 20px 20px;">
+                                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">Order Items</h3>
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden;">
+                                        ${itemsList}
+                                    </table>
+                                </td>
+                            </tr>
 
-            </div>
+                            <!-- TOTAL -->
+                            <tr>
+                                <td style="padding: 0 20px 30px 20px;">
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 2px solid #ff69b4; padding-top: 15px;">
+                                        <tr>
+                                            <td style="text-align: left;">
+                                                <h3 style="margin: 0; font-size: 18px; color: #333;">Total Amount</h3>
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <h3 style="margin: 0; font-size: 22px; color: #ff69b4; font-weight: bold;">
+                                                    GH₵${order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </h3>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <!-- FOOTER -->
+                            <tr>
+                                <td style="background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                                    <p style="margin: 0 0 10px 0; font-size: 14px; color: #333; font-weight: 600;">
+                                        Need Help?
+                                    </p>
+                                    <p style="margin: 0 0 5px 0; font-size: 13px; color: #666;">
+                                        📧 support@erdnascollections.com
+                                    </p>
+                                    <p style="margin: 0 0 15px 0; font-size: 13px; color: #666;">
+                                        📱 WhatsApp: <a href="https://wa.me/233274883478" style="color: #666; text-decoration: none;">+233 27 488 3478</a>
+                                    </p>
+                                    <p style="margin: 0; font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 1px;">
+                                        © ${new Date().getFullYear()} Erdnas Collections. All rights reserved.
+                                    </p>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </body>
         </html>
     `;
