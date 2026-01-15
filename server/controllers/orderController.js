@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const crypto = require('crypto');
+const { sendOrderReceipt } = require('../utils/emailService');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -117,7 +118,9 @@ exports.updateOrderStatus = async (req, res) => {
                 ...(paymentReference && { paymentReference })
             },
             include: {
-                items: true
+                items: {
+                    include: { product: true }
+                }
             }
         });
 
@@ -128,6 +131,9 @@ exports.updateOrderStatus = async (req, res) => {
                 where: { id: { in: productIds } },
                 data: { isSold: true }
             });
+
+            // Send order receipt email
+            await sendOrderReceipt(order);
         }
 
         res.status(200).json({
@@ -203,7 +209,11 @@ exports.handlePaystackWebhook = async (req, res) => {
             // 3. Find the order by reference and update it
             const order = await prisma.order.findFirst({
                 where: { paymentReference: reference },
-                include: { items: true }
+                include: {
+                    items: {
+                        include: { product: true }
+                    }
+                }
             });
 
             if (order) {
@@ -218,6 +228,9 @@ exports.handlePaystackWebhook = async (req, res) => {
                     where: { id: { in: productIds } },
                     data: { isSold: true }
                 });
+
+                // Send email receipt
+                await sendOrderReceipt(order);
 
                 console.log(`Order ${order.id} verified via Webhook! Reference: ${reference}`);
             } else {
