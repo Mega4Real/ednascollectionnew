@@ -604,9 +604,30 @@ const AdminDashboard = () => {
                         </form>
                     </div>
 
+                    <div className="stats-container">
+                        <div className="stat-card" style={{ borderLeft: '4px solid #ff69b4' }}>
+                            <p>Total Price</p>
+                            <h3>
+                                ₵{products.reduce((sum, p) => sum + p.price, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </h3>
+                        </div>
+                        <div className="stat-card" style={{ borderLeft: '4px solid #dc2626' }}>
+                            <p>Sold Dresses Price</p>
+                            <h3>
+                                ₵{products.filter(p => p.isSold).reduce((sum, p) => sum + p.price, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </h3>
+                        </div>
+                        <div className="stat-card" style={{ borderLeft: '4px solid #059669' }}>
+                            <p>Current Price</p>
+                            <h3>
+                                ₵{(products.reduce((sum, p) => sum + p.price, 0) - products.filter(p => p.isSold).reduce((sum, p) => sum + p.price, 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </h3>
+                        </div>
+                    </div>
+
                     <div className="product-list">
                         <h2 style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            Product List ({products.length}) | Total Price: ₵{products.reduce((sum, product) => sum + product.price, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            Product List ({products.length})
                         </h2>
                         <div className="table-container">
                             <DndContext
