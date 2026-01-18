@@ -150,15 +150,26 @@ const Home = () => {
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        // Scroll to top of product grid, accounting for fixed header
-        const dressContainer = document.querySelector('.dress-container');
-        if (dressContainer) {
-            const headerHeight = window.innerWidth <= 768 ? 40 : 128; // Approximate header heights
-            const offsetTop = dressContainer.offsetTop - headerHeight;
-            window.scrollTo({ top: Math.max(0, offsetTop), behavior: 'smooth' });
-        } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+
+        // Use a small delay to allow React to start rendering new items
+        // and for the DOM to be ready for scrolling
+        setTimeout(() => {
+            const dressContainer = document.querySelector('.dress-container');
+            if (dressContainer) {
+                const headerHeight = window.innerWidth <= 768 ? 40 : 128;
+                // getBoundingClientRect().top is relative to viewport, 
+                // so we add window.scrollY to get position relative to document
+                const rect = dressContainer.getBoundingClientRect();
+                const scrollTop = rect.top + window.scrollY - headerHeight;
+
+                window.scrollTo({
+                    top: Math.max(0, scrollTop),
+                    behavior: 'smooth'
+                });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }, 10);
     };
 
     // Generate page numbers
